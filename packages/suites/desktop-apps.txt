@@ -1,0 +1,8 @@
+#: Everyday GUI apps: browsers, music, video, AI clients
+# name          | arch                    | debian          | fedora   | flatpak                 | note
+firefox         | firefox                 | firefox-esr     | firefox  | org.mozilla.firefox     |
+google-chrome   | google-chrome           |                 |          | com.google.Chrome       | Arch: AUR
+spotify         | spotify-launcher        |                 |          | com.spotify.Client      |
+vlc             | vlc                     | vlc             |          | org.videolan.VLC        | Fedora: needs RPM Fusion, flatpak instead
+chatgpt         | chatgpt-bin             |                 |          |                         | Arch: AUR (unofficial client)
+opencode        | opencode-desktop-bin    |                 |          |                         | Arch: AUR

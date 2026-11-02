@@ -1,0 +1,17 @@
+#: CLI essentials for any machine
+# name          | arch                    | debian                  | fedora                  | flatpak | note
+git             | git                     | git                     | git                     |         |
+curl            | curl wget               | curl wget               | curl wget               |         |
+zsh             | zsh                     | zsh                     | zsh                     |         | chsh -s "$(command -v zsh)" to make it the login shell
+starship        | starship                | @script:starship        | @script:starship        |         | prompt
+zoxide          | zoxide                  | zoxide                  | zoxide                  |         |
+fzf             | fzf                     | fzf                     | fzf                     |         |
+fd              | fd                      | fd-find                 | fd-find                 |         |
+ripgrep         | ripgrep                 | ripgrep                 | ripgrep                 |         |
+bat             | bat                     | bat                     | bat                     |         |
+btop            | btop                    | btop                    | btop                    |         |
+fastfetch       | fastfetch               | fastfetch               | fastfetch               |         | Debian 13+ / Ubuntu 24.10+
+jq              | jq                      | jq                      | jq                      |         |
+unzip           | unzip                   | unzip                   | unzip                   |         |
+lazygit         | lazygit                 | lazygit                 |                         |         | Fedora: COPR atim/lazygit
+github-cli      | github-cli              | gh                      | gh                      |         | then: gh auth login && gh auth setup-git

@@ -1,0 +1,7 @@
+#: Mice, headsets, RGB, Bluetooth. Trim to the hardware you own.
+# name          | arch                                  | debian                    | fedora            | flatpak             | note
+bluetooth       | bluez bluez-utils blueman @script:bluetooth | bluez blueman @script:bluetooth | bluez blueman @script:bluetooth |   | enables bluetooth.service
+piper           | piper                                 | piper                     | piper             | org.freedesktop.Piper | gaming mice (libratbag: Logitech, Razer, SteelSeries...)
+solaar          | solaar                                | solaar                    | solaar            |                     | Logitech Unifying / Bolt receivers
+headsetcontrol  | headsetcontrol                        | headsetcontrol            | headsetcontrol    |                     | sidetone/battery/LEDs for many USB headsets
+openrgb         | openrgb                               |                           |                   | org.openrgb.OpenRGB | RGB control

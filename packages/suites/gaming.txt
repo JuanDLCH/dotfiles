@@ -1,0 +1,8 @@
+#: Steam, Proton tools, launchers, overlays
+# name          | arch                                  | debian            | fedora            | flatpak                         | note
+steam           | steam                                 |                   |                   | com.valvesoftware.Steam         | Arch: enable [multilib] first
+gamemode        | gamemode lib32-gamemode               | gamemode          | gamemode          |                                 |
+mangohud        | mangohud lib32-mangohud               | mangohud          | mangohud          |                                 | FPS overlay
+lutris          | lutris                                | lutris            | lutris            | net.lutris.Lutris               |
+heroic          | heroic-games-launcher-bin             |                   |                   | com.heroicgameslauncher.hgl     | Epic / GOG / Amazon. Arch: AUR
+protonup-qt     | protonup-qt                           |                   |                   | net.davidotek.pupgui2           | GE-Proton manager. Arch: AUR

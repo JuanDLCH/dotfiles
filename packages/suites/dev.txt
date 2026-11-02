@@ -1,0 +1,11 @@
+#: Programming: Python, Node, Docker, VS Code, Claude Code
+# name          | arch                                      | debian                                  | fedora                                  | flatpak               | note
+build-tools     | base-devel                                | build-essential                         | gcc gcc-c++ make                        |                       |
+python          | python python-pip                         | python3 python3-pip python3-venv        | python3 python3-pip                     |                       |
+uv              | uv                                        | @script:uv                              | uv                                      |                       | Python package/venv manager
+nodejs          | nodejs npm                                | nodejs npm                              | nodejs npm                              |                       | nvm is optional on top
+pnpm            | pnpm                                      | @script:pnpm                            | @script:pnpm                            |                       |
+docker          | docker docker-compose docker-buildx @script:docker-post | docker.io docker-compose @script:docker-post | moby-engine docker-compose @script:docker-post | | adds you to the docker group (log out/in)
+vscode          | code                                      | @script:vscode                          | @script:vscode                          | com.visualstudio.code | Arch `code` is Code - OSS
+claude-code     | @script:claude                            | @script:claude                          | @script:claude                          |                       | official native installer
+shellcheck      | shellcheck                                | shellcheck                              | ShellCheck                              |                       |
