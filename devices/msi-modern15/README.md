@@ -6,7 +6,7 @@ Ryzen 5 5500U laptop, Spanish (`es`) keyboard. Device key in `home/.chezmoidata/
 ## Fn keys
 
 What each key sends, and what my config does with it. The binds are in
-`home/dot_config/hypr/my-linux.{lua,conf}.tmpl`, and the actions live in `~/.local/libexec/hw-keys/hw`.
+`home/dot_config/hypr/juandy.{lua,conf}.tmpl`, and the actions live in `~/.local/libexec/hw-keys/hw`.
 
 | Key | Arrives as | Action |
 |---|---|---|

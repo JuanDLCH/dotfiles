@@ -35,7 +35,7 @@ sudo evtest               # if wev shows nothing, check whether the kernel sees 
 
 Shared Fn actions (touchpad, rotate, profile, display, camera) are in `hw` and only need
 `fn_keys: true` and the ids. Keys unique to this device: add a block guarded by
-`{{ if eq .device "<device-key>" }}` in `home/dot_config/hypr/my-linux.{lua,conf}.tmpl`.
+`{{ if eq .device "<device-key>" }}` in `home/dot_config/hypr/juandy.{lua,conf}.tmpl`.
 
 ## 4. Apply
 

@@ -37,6 +37,9 @@
 {{- $gitName := promptStringOnce . "git_name" "Git name" -}}
 {{- $gitEmail := promptStringOnce . "git_email" "Git email" -}}
 
+# Remember where the repo lives (it may be a clone outside ~/.local/share/chezmoi).
+sourceDir = {{ .chezmoi.workingTree | quote }}
+
 [data]
     device = {{ $device | quote }}
     desktop = {{ $desktop | quote }}

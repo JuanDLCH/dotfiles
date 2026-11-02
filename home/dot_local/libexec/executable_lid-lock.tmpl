@@ -1,7 +1,7 @@
 #!/bin/sh
 {{- $dev := index .devices .device }}
 # Closing the lid locks the session instead of suspending, so background work (Claude agents)
-# keeps running on AC. On battery, a closed lid always suspends. Managed by chezmoi (my-linux-configs).
+# keeps running on AC. On battery, a closed lid always suspends. Managed by chezmoi (dotfiles).
 # Holds a handle-lid-switch inhibitor for as long as it runs; logind then ignores the lid.
 LID=${LID_STATE:-{{ $dev.lid }}}
 if [ -z "$LID_INHIBITED" ]; then

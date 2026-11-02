@@ -9,5 +9,5 @@ set -eu
 {{- if $suites }}
 exec "{{ .chezmoi.workingTree }}/packages/install.sh" --suite {{ $suites | join "," | quote }}
 {{- else }}
-echo "my-linux: no package suites selected (chezmoi init --prompt to choose)"
+echo "juandy: no package suites selected (chezmoi init --prompt to choose)"
 {{- end }}

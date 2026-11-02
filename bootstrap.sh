@@ -3,12 +3,12 @@
 # device/desktop/suites and apply everything.
 #
 #   From a clone:  ./bootstrap.sh
-#   From nothing:  bash -c "$(curl -fsSL https://raw.githubusercontent.com/JuanDLCH/my-linux-configs/main/bootstrap.sh)"
+#   From nothing:  bash -c "$(curl -fsSL https://raw.githubusercontent.com/JuanDLCH/dotfiles/main/bootstrap.sh)"
 #
 # Extra args go to `chezmoi init` (e.g. --promptDefaults, --prompt).
 set -euo pipefail
 
-REPO=${MY_LINUX_REPO:-https://github.com/JuanDLCH/my-linux-configs.git}
+REPO=${DOTFILES_REPO:-https://github.com/JuanDLCH/dotfiles.git}
 here=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)
 
 pm_install() {

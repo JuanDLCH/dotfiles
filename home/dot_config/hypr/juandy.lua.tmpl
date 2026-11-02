@@ -1,7 +1,7 @@
 {{- $dev := index .devices .device -}}
--- my-linux-configs: personal keybinds and hardware keys for Lua-config Hyprland (HyDE).
--- Managed by chezmoi: edit home/dot_config/hypr/my-linux.lua.tmpl in the repo, then `chezmoi apply`.
--- Loaded by `require("my-linux")` at the end of ~/.config/hypr/hyprland.lua, so it overrides
+-- dotfiles: personal keybinds and hardware keys for Lua-config Hyprland (HyDE).
+-- Managed by chezmoi: edit home/dot_config/hypr/juandy.lua.tmpl in the repo, then `chezmoi apply`.
+-- Loaded by `require("juandy")` at the end of ~/.config/hypr/hyprland.lua, so it overrides
 -- the distro's binds. To replace a bind, unbind it first (flags must match otherwise).
 -- Device: {{ .device }}
 local home = os.getenv("HOME")

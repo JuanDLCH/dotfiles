@@ -1,4 +1,4 @@
-# my-linux-configs
+# dotfiles
 
 Turn a fresh Linux install into *my* machine: keybinds, laptop Fn keys, lid/idle behaviour,
 shell and git config, and the apps I use, split by **device** and **distro**.
@@ -11,9 +11,12 @@ Quickshell/waybar desktop lives in a separate repo,
 ## Quick start
 
 ```bash
-git clone https://github.com/JuanDLCH/my-linux-configs ~/.local/share/chezmoi
+git clone https://github.com/JuanDLCH/dotfiles ~/.local/share/chezmoi
 ~/.local/share/chezmoi/bootstrap.sh
 ```
+
+With chezmoi already installed, `chezmoi init --apply JuanDLCH` does the same (it finds the
+`dotfiles` repo by name). The clone can live anywhere: `bootstrap.sh` remembers its location.
 
 `bootstrap.sh` installs git and [chezmoi](https://chezmoi.io), then asks:
 
@@ -31,8 +34,8 @@ Answers are saved in `~/.config/chezmoi/chezmoi.toml`. To change them, run `chez
 ```
 home/                       chezmoi source: everything that lands in $HOME
   .chezmoidata/devices.yaml   hardware facts per machine (ids, paths, layout)
-  dot_config/hypr/            my-linux.lua / my-linux.conf: keybinds + Fn keys
-  dot_config/my-linux/        kitty, zsh and hypridle snippets included from distro files
+  dot_config/hypr/            juandy.lua / juandy.conf: keybinds + Fn keys
+  dot_config/juandy/          kitty, zsh and hypridle snippets included from distro files
   dot_local/libexec/          hw (Fn-key actions), lid-lock
   run_after_20-includes.sh    adds the include lines to the distro's configs
   run_onchange_after_30-packages.sh   installs the chosen suites
@@ -52,7 +55,7 @@ AGENTS.md                   instructions for an AI agent setting up a machine
 chezmoi diff              # what would change in $HOME
 chezmoi apply             # apply the repo
 chezmoi re-add            # copy live edits of managed files back into the repo
-chezmoi edit ~/.config/hypr/my-linux.lua   # edit the template, not the rendered file
+chezmoi edit ~/.config/hypr/juandy.lua   # edit the template, not the rendered file
 chezmoi cd                # shell in the repo, then git commit/push
 ```
 
@@ -69,7 +72,7 @@ packages/install.sh --suite dev,gaming
 - **An app:** add a line to a suite in `packages/suites/`. Leave a distro column empty to fall back to flatpak; use `@script:name` for installers in `packages/scripts/`.
 - **A suite:** a new `packages/suites/<name>.txt` (first line `#: description`), then add the name to the list in `home/.chezmoi.toml.tmpl`.
 - **A machine:** follow `devices/_template/README.md`.
-- **A keybind for every machine:** edit both `home/dot_config/hypr/my-linux.lua.tmpl` and `my-linux.conf.tmpl`.
+- **A keybind for every machine:** edit both `home/dot_config/hypr/juandy.lua.tmpl` and `juandy.conf.tmpl`.
 
 ## Not included
 

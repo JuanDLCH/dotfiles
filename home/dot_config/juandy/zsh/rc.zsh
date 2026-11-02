@@ -1,4 +1,4 @@
-# my-linux-configs: personal zsh settings, sourced from ~/.zshrc
+# dotfiles: personal zsh settings, sourced from ~/.zshrc
 # (the source line is added by chezmoi; the distro's .zshrc is left as is).
 
 # ~/.local/bin first (claude, chezmoi, user scripts).

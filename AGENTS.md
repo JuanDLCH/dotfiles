@@ -36,7 +36,7 @@ command -v hyde-shell && echo HyDE                  # HyDE uses hyprland.lua
 ## 2. Apply
 
 ```bash
-git clone https://github.com/JuanDLCH/my-linux-configs ~/.local/share/chezmoi
+git clone https://github.com/JuanDLCH/dotfiles ~/.local/share/chezmoi
 ~/.local/share/chezmoi/bootstrap.sh          # installs chezmoi, prompts, applies
 ```
 
@@ -75,7 +75,7 @@ on Arch needs `[multilib]` enabled.
 
 ## 4. Hypridle (manual merge)
 
-`~/.config/my-linux/hypridle.conf` holds the idle policy (dim 60 s, lock 120 s, screen off 300 s,
+`~/.config/juandy/hypridle.conf` holds the idle policy (dim 60 s, lock 120 s, screen off 300 s,
 suspend 500 s on battery only). hypridle cannot include files, so merge its `listener` blocks
 into the distro's `~/.config/hypr/hypridle.conf` (back it up first), replacing listeners with
 the same purpose. Keep the distro's `lock_cmd` if it has one.
