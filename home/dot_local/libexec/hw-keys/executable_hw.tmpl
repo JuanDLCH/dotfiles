@@ -191,9 +191,12 @@ case ${1:-} in
     rotate)   rotate ;;
     profile)  profile "${2:-}" ;;
     display)  display ;;
-    # Media helpers moved to hyde-quickshell-customizations (hyde-qs-media); older
-    # waybar layouts still call `hw cover`, so forward when it is installed.
+    # Media helpers belong to the desktop shell, not to this repo. Older waybar layouts
+    # still call `hw cover`: forward to a local hw-media next to this file (not managed
+    # by chezmoi), else to hyde-qs-media from hyde-quickshell-customizations.
     cover|seek|focus-player)
+        media="$(dirname "$0")/hw-media"
+        if [[ -x $media ]]; then exec "$media" "$@"; fi
         if command -v hyde-qs-media >/dev/null; then exec hyde-qs-media "$@"; fi
         exit 0 ;;
     *) sed -n '3,8p' "$0"; exit 1 ;;
