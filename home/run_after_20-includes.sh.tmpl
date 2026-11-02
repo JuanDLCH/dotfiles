@@ -1,0 +1,43 @@
+#!/bin/sh
+# my-linux-configs: hook my files into the configs the distro owns, by appending ONE
+# include line to each. Never rewrites those files. Runs on every `chezmoi apply`
+# (cheap and idempotent), so a distro update that resets a file gets the line back.
+set -eu
+
+add_line() {   # add_line <file> <line> [create]
+    file=$1 line=$2
+    case $file in *.lua) marker='-- my-linux-configs' ;; *) marker='# my-linux-configs' ;; esac
+    if [ ! -f "$file" ]; then
+        [ "${3:-}" = create ] || { echo "my-linux: $file not found, skipped (add: $line)" >&2; return 0; }
+        mkdir -p "$(dirname "$file")"; : >"$file"
+    fi
+    grep -qxF "$line" "$file" && return 0
+    printf '\n%s\n%s\n' "$marker" "$line" >>"$file"
+    echo "my-linux: added include to $file"
+}
+
+# Refuse to double-load: an old copy of these binds/autostarts in the main config would
+# start lid-lock and the camera watcher twice. Remove them there first (see AGENTS.md).
+check_old_copy() {   # check_old_copy <file> <include-line>
+    [ -f "$1" ] || return 0
+    grep -qxF "$2" "$1" && return 0
+    if grep -qE 'libexec/(lid-lock|hw-keys/hw)' "$1"; then
+        echo "my-linux: $1 already has hw-keys/lid-lock lines from before; remove them, then run chezmoi apply again." >&2
+        return 1
+    fi
+}
+
+hypr="$HOME/.config/hypr"
+{{- if eq .desktop "hyprland-lua" }}
+main="$hypr/hyprland.lua"
+line='require("my-linux")'
+check_old_copy "$main" "$line" && add_line "$main" "$line"
+{{- else if eq .desktop "hyprland-conf" }}
+# Main config: override with `hypr_main = "..."` under [data] in ~/.config/chezmoi/chezmoi.toml
+main={{ if hasKey . "hypr_main" }}{{ .hypr_main | quote }}{{ else }}"$hypr/hyprland.conf"{{ end }}
+line='source = ~/.config/hypr/my-linux.conf'
+check_old_copy "$main" "$line" && add_line "$main" "$line"
+{{- end }}
+
+add_line "$HOME/.config/kitty/kitty.conf" 'include ../my-linux/kitty.conf' create
+add_line "$HOME/.zshrc" '[ -r ~/.config/my-linux/zsh/rc.zsh ] && . ~/.config/my-linux/zsh/rc.zsh' create

@@ -1,0 +1,43 @@
+{{- $dev := index .devices .device -}}
+# my-linux-configs: my idle policy. REFERENCE ONLY, chezmoi does not wire it in:
+# hypridle cannot `source` files yet, and distros (HyDE, Ryoku...) ship their own
+# hypridle.conf. Merge these listeners into ~/.config/hypr/hypridle.conf by hand
+# (or ask an agent to, see AGENTS.md), or run `hypridle -c` on this file.
+#
+# Policy: dim 60 s -> lock 120 s -> screen off 300 s -> suspend 500 s on battery only.
+# On AC the session locks and the screen turns off but work keeps running.
+
+general {
+    lock_cmd = {{ if lookPath "hyde-shell" }}hyde-shell lockscreen.sh{{ else }}pidof hyprlock || hyprlock{{ end }}
+    before_sleep_cmd = loginctl lock-session
+    inhibit_sleep = 3   # wait until the session reports itself locked before sleeping
+}
+
+listener {
+    timeout = 60
+    on-timeout = brightnessctl -s && brightnessctl s 1%
+    on-resume = brightnessctl -r
+}
+
+listener {
+    timeout = 120
+    on-timeout = loginctl lock-session
+}
+
+listener {
+    timeout = 300
+{{- if eq .desktop "hyprland-lua" }}
+    on-timeout = hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })'
+    on-resume = hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
+{{- else }}
+    on-timeout = hyprctl dispatch dpms off
+    on-resume = hyprctl dispatch dpms on
+{{- end }}
+}
+{{- if $dev.laptop }}
+
+listener {
+    timeout = 500
+    on-timeout = sh -c '[ "$(cat {{ $dev.ac }})" = 1 ] || systemctl suspend'
+}
+{{- end }}

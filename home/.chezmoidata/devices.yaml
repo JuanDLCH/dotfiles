@@ -1,0 +1,28 @@
+# Hardware facts per machine. Templates read the entry picked by the `device`
+# value in ~/.config/chezmoi/chezmoi.toml (chosen on `chezmoi init`).
+#
+#   dmi          /sys/class/dmi/id/product_name, used to suggest the device on init
+#   laptop       installs lid-lock (closing the lid locks; suspends only on battery)
+#   kb_layout    XKB layout for the compositor
+#   fn_keys      installs the `hw` helper and the Fn-key binds (needs the ids below)
+#   internal_scale  scale used by `hw display` / `hw rotate` for the built-in panel
+#
+# Add a machine: copy devices/_template/README.md, add an entry here, run `chezmoi init`.
+devices:
+  msi-modern15:
+    description: MSI Modern 15 A5M (Ryzen 5 5500U) laptop
+    dmi: Modern 15 A5M
+    laptop: true
+    kb_layout: es
+    fn_keys: true
+    touchpad: pnp0c50:0d-06cb:7e7e-touchpad   # hyprctl devices
+    camera_usb: "5986 211c"                     # lsusb: Bison Electronics HD Webcam
+    ac: /sys/class/power_supply/ADP1/online
+    lid: /proc/acpi/button/lid/LID0/state
+    internal_scale: "1.5"
+
+  generic:
+    description: Any other machine (global config only, no hardware binds)
+    laptop: false
+    kb_layout: us
+    fn_keys: false

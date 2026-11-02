@@ -1,0 +1,45 @@
+{{- /* Asked once on `chezmoi init`; answers live in ~/.config/chezmoi/chezmoi.toml.
+       Re-ask with `chezmoi init --prompt`. */ -}}
+
+{{- /* Device: suggest the entry whose dmi matches this machine. */ -}}
+{{- $product := "" -}}
+{{- if stat "/sys/class/dmi/id/product_name" -}}
+{{-   $product = output "cat" "/sys/class/dmi/id/product_name" | trim -}}
+{{- end -}}
+{{- $deviceGuess := "generic" -}}
+{{- $deviceNames := list -}}
+{{- /* .chezmoidata is not loaded yet while this file renders, so read it directly. */ -}}
+{{- $devices := (include ".chezmoidata/devices.yaml" | fromYaml).devices -}}
+{{- range $name, $d := $devices -}}
+{{-   $deviceNames = append $deviceNames $name -}}
+{{-   if and (hasKey $d "dmi") (eq $d.dmi $product) -}}{{ $deviceGuess = $name }}{{- end -}}
+{{- end -}}
+{{- /* Prompt texts are short on purpose: they are the keys for non-interactive answers,
+       e.g. chezmoi init --promptChoice Device=msi-modern15 --promptChoice Desktop=hyprland-conf */ -}}
+{{- $device := promptChoiceOnce . "device" "Device" $deviceNames $deviceGuess -}}
+
+{{- /* Desktop: which kind of keybind file to install. */ -}}
+{{- $hypr := joinPath .chezmoi.homeDir ".config/hypr" -}}
+{{- $desktopGuess := "none" -}}
+{{- if stat (joinPath $hypr "hyprland.lua") -}}
+{{-   $desktopGuess = "hyprland-lua" -}}
+{{- else if or (stat (joinPath $hypr "hyprland.conf")) (lookPath "Hyprland") -}}
+{{-   $desktopGuess = "hyprland-conf" -}}
+{{- end -}}
+{{- $desktop := promptChoiceOnce . "desktop" "Desktop" (list "hyprland-lua" "hyprland-conf" "none") $desktopGuess -}}
+
+{{- /* Stored as a comma-separated string: the Once/--prompt logic works reliably for strings. */ -}}
+{{- /* Any of `,` `/` or spaces separates names: "base dev", "base/dev" (CLI-safe), "base,dev".
+       Available: base dev desktop-apps gaming peripherals (packages/suites/). */ -}}
+{{- $suites := promptStringOnce . "suites" "Suites" "base" -}}
+{{- $suites = regexReplaceAll "[\\s,/]+" $suites "," | trimAll "," -}}
+
+{{- $gitName := promptStringOnce . "git_name" "Git name" -}}
+{{- $gitEmail := promptStringOnce . "git_email" "Git email" -}}
+
+[data]
+    device = {{ $device | quote }}
+    desktop = {{ $desktop | quote }}
+    suites = {{ $suites | quote }}
+    git_name = {{ $gitName | quote }}
+    git_email = {{ $gitEmail | quote }}

@@ -1,0 +1,13 @@
+#!/bin/sh
+{{- /* Re-runs only when the chosen suites or their manifests change. */}}
+{{- $suites := splitList "," .suites | compact }}
+# suites: {{ .suites }}
+{{- range $suites }}
+# {{ . }}.txt sha256: {{ include (printf "../packages/suites/%s.txt" .) | sha256sum }}
+{{- end }}
+set -eu
+{{- if $suites }}
+exec "{{ .chezmoi.workingTree }}/packages/install.sh" --suite {{ $suites | join "," | quote }}
+{{- else }}
+echo "my-linux: no package suites selected (chezmoi init --prompt to choose)"
+{{- end }}
