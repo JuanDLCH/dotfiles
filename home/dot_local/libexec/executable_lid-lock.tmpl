@@ -1,0 +1,40 @@
+#!/bin/sh
+{{- $dev := index .devices .device }}
+# Closing the lid locks the session instead of suspending, so background work (Claude agents)
+# keeps running on AC. On battery, a closed lid always suspends. Managed by chezmoi (my-linux-configs).
+# Holds a handle-lid-switch inhibitor for as long as it runs; logind then ignores the lid.
+LID=${LID_STATE:-{{ $dev.lid }}}
+if [ -z "$LID_INHIBITED" ]; then
+    LID_INHIBITED=1 exec systemd-inhibit --what=handle-lid-switch --who=lid-lock \
+        --why="Lock on lid close, keep running" --mode=block "$0" "$@"
+fi
+AC=${AC_ONLINE:-{{ $dev.ac }}}
+on_ac() { [ "$(cat "$AC" 2>/dev/null)" = 1 ]; }
+{{- if eq .desktop "hyprland-lua" }}
+screen() { hyprctl dispatch "hl.dsp.dpms({ action = \"$1\" })" >/dev/null 2>&1; }   # enable|disable
+{{- else if eq .desktop "hyprland-conf" }}
+screen() { if [ "$1" = enable ]; then hyprctl dispatch dpms on; else hyprctl dispatch dpms off; fi >/dev/null 2>&1; }
+{{- else }}
+screen() { :; }   # no Hyprland: the locker/compositor handles the screen
+{{- end }}
+prev=open
+while sleep 1; do
+    cur=$(awk '{print $2}' "$LID" 2>/dev/null)
+    [ -n "$cur" ] || continue
+    if [ "$cur" = closed ] && [ "$prev" != closed ]; then
+        pgrep -x hyprlock >/dev/null || loginctl lock-session
+        sleep 1
+        if on_ac; then
+            screen disable
+        else
+            systemctl suspend -i          # on battery: lid closed always stops everything
+        fi
+    elif [ "$cur" = open ] && [ "$prev" = closed ]; then
+        screen enable
+    fi
+    # unplugged while the lid is closed: stop too
+    if [ "$cur" = closed ] && ! on_ac && [ "$prev" = closed ] && [ -z "$suspended" ]; then suspended=1; systemctl suspend -i; fi
+    [ "$cur" = open ] && suspended=
+    on_ac && suspended=
+    prev=$cur
+done

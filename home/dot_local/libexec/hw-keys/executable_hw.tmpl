@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+{{- $dev := index .devices .device }}
+# {{ $dev.description }}: Fn-key helpers. Managed by chezmoi (my-linux-configs).
+#   hw camera watch [--osd]   camera on/off events: JSON for a bar, or an OSD with --osd
+#   hw touchpad toggle|enable|disable|status
+#   hw rotate                 rotate the built-in screen 180° (toggles)
+#   hw profile [status]       cycle the power profile (Fn+F7) / JSON for a bar
+#   hw display                Win+P style menu for an external display
+# HW_DRY_RUN=1 prints the hyprctl calls instead of running them.
+set -u
+
+TOUCHPAD='{{ $dev.touchpad }}'
+CAM_ID='{{ $dev.camera_usb }}'
+SCALE='{{ $dev.internal_scale }}'
+HYPR_CONFIG='{{ if eq .desktop "hyprland-conf" }}conf{{ else }}lua{{ end }}'   # how to talk to hyprctl
+STATE="${XDG_RUNTIME_DIR:-/tmp}/hw-keys"
+mkdir -p "$STATE"
+
+hypr() {   # hypr eval <lua> | hypr keyword <name> <value>
+    if [[ -n ${HW_DRY_RUN:-} ]]; then printf 'hyprctl %q' "$1"; shift; printf ' %q' "$@"; echo; return 0; fi
+    hyprctl "$@" >/dev/null
+}
+
+osd() {   # $1 icon, $2 text; SwayOSD when present, else a notification
+    if command -v swayosd-client >/dev/null; then
+        swayosd-client --custom-icon "$1" --custom-message "$2" >/dev/null 2>&1 || true
+    else
+        notify-send -i "$1" -t 1500 "$2" 2>/dev/null || true
+    fi
+}
+refresh_bar() { pkill -x "-RTMIN+$1" waybar 2>/dev/null || true; }
+
+menu() {   # dmenu-style picker from whatever launcher the distro ships
+    local p=$1
+    if command -v rofi >/dev/null; then rofi -dmenu -i -p "$p"
+    elif command -v fuzzel >/dev/null; then fuzzel --dmenu -p "$p: "
+    elif command -v wofi >/dev/null; then wofi --dmenu -p "$p"
+    else notify-send "hw" "Install rofi, fuzzel or wofi for this menu"; return 1
+    fi
+}
+
+# Monitor rule in either config dialect.
+#   mon_set <name> <mode> <position> <scale> [transform] [mirror]
+mon_set() {
+    local name=$1 mode=$2 pos=$3 scale=$4 tr=${5:-} mirror=${6:-}
+    if [[ $HYPR_CONFIG == lua ]]; then
+        local extra=""
+        [[ -n $tr ]] && extra+=", transform=$tr"
+        [[ -n $mirror ]] && extra+=", mirror='$mirror'"
+        hypr eval "hl.monitor({output='$name', mode='$mode', position='$pos', scale='$scale'$extra})"
+    else
+        local v="$name,$mode,$pos,$scale"
+        [[ -n $tr ]] && v+=",transform,$tr"
+        [[ -n $mirror ]] && v+=",mirror,$mirror"
+        hypr keyword monitor "$v"
+    fi
+}
+mon_off() {
+    if [[ $HYPR_CONFIG == lua ]]; then hypr eval "hl.monitor({output='$1', disabled=true})"
+    else hypr keyword monitor "$1,disable"; fi
+}
+
+# ── Camera ──────────────────────────────────────────────
+cam_present() {
+    local d
+    for d in /sys/bus/usb/devices/*/; do
+        [[ -r $d/idVendor && $(<"$d/idVendor") == "${CAM_ID% *}" \
+            && $(<"$d/idProduct") == "${CAM_ID#* }" ]] && return 0
+    done
+    return 1
+}
+
+cam_json() {   # $1 = on|off
+    if [[ $1 == on ]]; then
+        printf '{"text":"","class":"on"}\n'
+    else
+        printf '{"text":"\U000F05DF","class":"off","tooltip":"Camera turned off with the keyboard\\nPress Fn+F6 to turn it on"}\n'
+    fi
+}
+
+# The kernel reports add/remove of the video node immediately, so the state comes
+# from the event type and sysfs is not re-read.
+camera_watch() {
+    local osd_on=${1:-} last cur ev
+    cam_present && last=on || last=off
+    [[ $osd_on == --osd ]] || cam_json "$last"
+    stdbuf -oL udevadm monitor --kernel --subsystem-match=video4linux 2>/dev/null |
+    while read -r _ ev _; do
+        case $ev in add) cur=on ;; remove) cur=off ;; *) continue ;; esac
+        [[ $cur == "$last" ]] && continue
+        last=$cur
+        if [[ $osd_on == --osd ]]; then
+            if [[ $cur == on ]]; then osd camera-web-symbolic "Camera on"
+            else osd camera-disabled-symbolic "Camera off"; fi
+        else
+            cam_json "$cur"
+        fi
+    done
+}
+
+# ── Touchpad ────────────────────────────────────────────
+tp_apply() {   # $1 = true|false
+    if [[ $HYPR_CONFIG == lua ]]; then hypr eval "hl.device({name='$TOUCHPAD', enabled=$1})"
+    else hypr keyword "device[$TOUCHPAD]:enabled" "$1"; fi
+}
+
+touchpad() {
+    case ${1:-toggle} in
+        toggle) [[ -e $STATE/touchpad-off ]] && touchpad enable || touchpad disable ;;
+        disable)
+            osd touchpad-disabled-symbolic "Touchpad off"
+            tp_apply false && : >"$STATE/touchpad-off"; refresh_bar 22 ;;
+        enable)
+            osd input-touchpad-symbolic "Touchpad on"
+            tp_apply true && rm -f "$STATE/touchpad-off"; refresh_bar 22 ;;
+        status)
+            if [[ -e $STATE/touchpad-off ]]; then
+                printf '{"text":"\U000F037E","class":"off","tooltip":"Touchpad off\\nClick to turn it on"}\n'
+            else
+                printf '{"text":"","class":"on"}\n'
+            fi ;;
+    esac
+}
+
+# ── Rotate the built-in screen 180° ─────────────────────
+rotate() {
+    local m
+    m=$(hyprctl monitors -j | jq -r '[.[] | select(.name|startswith("eDP"))][0]
+        | [.name,.width,.height,.refreshRate,.x,.y,.scale,.transform] | @tsv') || return 1
+    [[ -n $m && $m != null ]] || { notify-send "Rotate screen" "Laptop display not found"; return 1; }
+    local name w h rate x y scale tr new
+    IFS=$'\t' read -r name w h rate x y scale tr <<<"$m"
+    new=$(( tr == 0 ? 2 : 0 ))
+    mon_set "$name" "$(LC_ALL=C printf '%sx%s@%.3f' "$w" "$h" "$rate")" "${x}x${y}" "$scale" "$new"
+    osd video-display-symbolic "Screen $([[ $new == 2 ]] && echo rotated 180° || echo normal)"
+}
+
+# ── Power profile (Fn+F7) ───────────────────────────────
+profile() {
+    local cur next label
+    cur=$(powerprofilesctl get)
+    if [[ ${1:-} == status ]]; then
+        case $cur in
+            power-saver) printf '{"text":"\U000F032A","class":"saver","tooltip":"Power profile: power saver\\nPress Fn+F7 to change"}\n' ;;
+            performance) printf '{"text":"\U000F04C5","class":"performance","tooltip":"Power profile: performance\\nPress Fn+F7 to change"}\n' ;;
+            *) printf '{"text":"","class":"balanced"}\n' ;;
+        esac
+        return
+    fi
+    case $cur in
+        power-saver) next=balanced;    label="Balanced" ;;
+        balanced)    next=performance; label="Performance" ;;
+        *)           next=power-saver; label="Power saver" ;;
+    esac
+    osd "power-profile-$next-symbolic" "Profile: $label"
+    powerprofilesctl set "$next" && refresh_bar 23
+}
+
+# ── Projection (Win+P) ──────────────────────────────────
+display() {
+    local ext int choice
+    # `monitors all` also lists the screen this menu disabled last time.
+    int=$(hyprctl monitors all -j | jq -r '[.[]|select(.name|startswith("eDP"))][0].name')
+    ext=$(hyprctl monitors all -j | jq -r '[.[]|select(.name|startswith("eDP")|not)][0].name // empty')
+    if [[ -z $ext ]]; then
+        notify-send -i video-display-symbolic "Project" "No external display connected"
+        return 0
+    fi
+    choice=$(printf '%s\n' "Laptop only" "Duplicate" "Extend" "External only" | menu "Project") || return 0
+    case $choice in
+        "Laptop only")
+            mon_set "$int" preferred 0x0 "$SCALE"
+            mon_off "$ext" ;;
+        Duplicate)
+            mon_set "$int" preferred 0x0 "$SCALE"
+            mon_set "$ext" preferred auto 1 "" "$int" ;;
+        Extend)
+            mon_set "$int" preferred 0x0 "$SCALE"
+            mon_set "$ext" preferred auto-right 1 ;;
+        "External only")
+            mon_set "$ext" preferred 0x0 1
+            mon_off "$int" ;;
+        *) return 0 ;;
+    esac
+    osd video-display-symbolic "$choice"
+}
+
+case ${1:-} in
+    camera)   [[ ${2:-} == watch ]] && camera_watch "${3:-}" ;;
+    touchpad) touchpad "${2:-toggle}" ;;
+    rotate)   rotate ;;
+    profile)  profile "${2:-}" ;;
+    display)  display ;;
+    # Media helpers moved to hyde-quickshell-customizations (hyde-qs-media); older
+    # waybar layouts still call `hw cover`, so forward when it is installed.
+    cover|seek|focus-player)
+        if command -v hyde-qs-media >/dev/null; then exec hyde-qs-media "$@"; fi
+        exit 0 ;;
+    *) sed -n '3,8p' "$0"; exit 1 ;;
+esac
