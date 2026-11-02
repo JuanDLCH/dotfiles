@@ -19,7 +19,10 @@ What each key sends, and what my config does with it. The binds are in
 | Fn+Print | `Super+Shift+S` | free for a screenshot picker (the desktop's own) |
 | F10, F12 | plain keys | unbound from the desktop so apps get them |
 
-The lid is handled by `~/.local/libexec/lid-lock`: closing it locks the session. On AC the screen turns off and work keeps running; on battery the laptop suspends.
+On **Ryoku** (`desktop = ryoku`) some keys use Ryoku's own tools: Fn+F4 → `ryoku wm act input.touchpad toggle`,
+Fn+F11 (Super+P) → `ryoku-monitor toggle`, volume/brightness → Ryoku's OSD. Fn+F6/F7/F12 still use `hw`.
+
+The lid is handled by `~/.local/libexec/lid-lock` (on Ryoku: `ryoku-lid` + `ryoku-clamshell`, same policy): closing it locks the session. On AC the screen turns off and work keeps running; on battery the laptop suspends.
 
 ## Hardware IDs (in `devices.yaml`)
 

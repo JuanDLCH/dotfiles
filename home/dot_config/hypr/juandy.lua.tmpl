@@ -1,8 +1,16 @@
 {{- $dev := index .devices .device -}}
--- dotfiles: personal keybinds and hardware keys for Lua-config Hyprland (HyDE).
--- Managed by chezmoi: edit home/dot_config/hypr/juandy.lua.tmpl in the repo, then `chezmoi apply`.
+{{- $ryoku := eq .desktop "ryoku" -}}
+-- dotfiles: personal keybinds and hardware keys for Lua-config Hyprland
+-- ({{ if $ryoku }}Ryoku{{ else }}HyDE{{ end }}). Managed by chezmoi: edit home/dot_config/hypr/juandy.lua.tmpl
+-- in the repo, then `chezmoi apply`.
+{{- if $ryoku }}
+-- Loaded by `require("juandy")` from ~/.config/hypr/user.lua, Ryoku's last-word file,
+-- so it wins over Ryoku's defaults and over Ryoku Settings.
+{{- else }}
 -- Loaded by `require("juandy")` at the end of ~/.config/hypr/hyprland.lua, so it overrides
--- the distro's binds. To replace a bind, unbind it first (flags must match otherwise).
+-- the distro's binds.
+{{- end }}
+-- To replace a bind, unbind it first (flags must match otherwise).
 -- Device: {{ .device }}
 local home = os.getenv("HOME")
 
@@ -13,24 +21,34 @@ hl.config({
 -- Plain F-keys stay free for apps (F2 rename, F5 refresh...); media keys send XF86 codes.
 for _, key in ipairs({ "F10", "F12" }) do hl.unbind(key) end
 
--- Super+L: lock and suspend. Idle and the lid only lock (see lid-lock / hypridle).
+-- Super+L: lock and suspend. Idle and the lid only lock on AC.
 hl.unbind("SUPER + L")
+{{- if $ryoku }}
+hl.bind("SUPER + L", hl.dsp.exec_cmd("ryoku-shell suspend"), { description = "[Session] lock and suspend" })
+{{- else }}
 hl.bind("SUPER + L", hl.dsp.exec_cmd("sh -c 'loginctl lock-session; sleep 1.5; systemctl suspend'"),
     { description = "[Session] lock and suspend" })
+{{- end }}
 
 -- Super+F toggles maximized <-> normal; F11 toggles real fullscreen.
+hl.unbind("SUPER + F")
+hl.unbind("F11")
+{{- if $ryoku }}
+-- (Ryoku's own Super+D maximize stays as well.)
+hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "maximized" }), { description = "[Window Management] toggle maximize" })
+hl.bind("F11", hl.dsp.window.fullscreen(), { description = "[Window Management] toggle fullscreen" })
+{{- else }}
 local function toggle_state(target)
     local w = assert(hl.get_active_window(), "No active window")
     local state = (tonumber(w.fullscreen) or 0) == target and 0 or target
     hl.dispatch(hl.dsp.window.fullscreen_state({ internal = state, client = state, window = w }))
 end
 hl.unbind("SHIFT + F11")
-hl.unbind("F11")
 hl.unbind("ALT + RETURN")
-hl.unbind("SUPER + F")
 hl.bind("SUPER + F", function() toggle_state(1) end, { description = "[Window Management] toggle maximize" })
 hl.bind("F11", function() toggle_state(2) end, { description = "[Window Management] toggle fullscreen" })
-{{- if lookPath "swayosd-client" }}
+{{- end }}
+{{- if and (not $ryoku) (lookPath "swayosd-client") }}
 
 -- OSD for volume, brightness and Caps Lock (SwayOSD is installed on this machine).
 for _, b in ipairs({
@@ -52,7 +70,7 @@ hl.bind("Caps_Lock", hl.dsp.exec_cmd("swayosd-client --caps-lock"), {
     description = "[Keyboard] Caps Lock OSD",
 })
 {{- end }}
-{{- if $dev.laptop }}
+{{- if and $dev.laptop (not $ryoku) }}
 
 -- Closing the lid locks; it suspends only on battery (background work keeps running on AC).
 hl.on("hyprland.start", function()
@@ -66,14 +84,21 @@ local hw = home .. "/.local/libexec/hw-keys/hw"
 hl.on("hyprland.start", function()
     hl.exec_cmd(hw .. " camera watch --osd")   -- Fn+F6: the EC cuts the camera, OSD on change
 end)
+{{- if $ryoku }}
+-- Fn+F4 arrives as Ctrl+Super+XF86TouchpadToggle; Ryoku only binds the bare key. Use
+-- Ryoku's touchpad lock so its state survives reloads and shows in the shell.
+hl.bind("CTRL + SUPER + XF86TouchpadToggle", hl.dsp.exec_cmd("ryoku wm act input.touchpad toggle"), { locked = true, description = "[Touchpad] toggle" })
+-- Fn+F11 sends Super+P: Ryoku's own `ryoku-monitor toggle` handles it.
+{{- else }}
 -- Fn+F4 arrives as Ctrl+Super+XF86TouchpadToggle.
 hl.bind("CTRL + SUPER + XF86TouchpadToggle", hl.dsp.exec_cmd(hw .. " touchpad toggle"), { locked = true, description = "[Touchpad] toggle + OSD" })
 hl.bind("XF86TouchpadToggle", hl.dsp.exec_cmd(hw .. " touchpad toggle"), { locked = true, description = "[Touchpad] toggle + OSD" })
--- Fn+F12: rotate the built-in screen 180°.
-hl.bind("XF86RotateWindows", hl.dsp.exec_cmd(hw .. " rotate"), { locked = true, description = "[Display] rotate laptop screen 180" })
 -- Fn+F11 sends Super+P: projection menu (replaces HyDE's Super+P snip).
 hl.unbind("SUPER + P")
 hl.bind("SUPER + P", hl.dsp.exec_cmd(hw .. " display"), { description = "[Display] projection menu" })
--- Fn+F7 (MSI Center key) arrives as XF86Launch1: cycle the power profile.
-hl.bind("XF86Launch1", hl.dsp.exec_cmd(hw .. " profile"), { locked = true, description = "[Power] cycle power profile + OSD" })
+{{- end }}
+-- Fn+F12: rotate the built-in screen 180°.
+hl.bind("XF86RotateWindows", hl.dsp.exec_cmd(hw .. " rotate"), { locked = true, description = "[Display] rotate laptop screen 180" })
+-- Fn+F7 (MSI Center key) arrives as XF86Launch1: cycle the power profile (power-profiles-daemon).
+hl.bind("XF86Launch1", hl.dsp.exec_cmd(hw .. " profile"), { locked = true, description = "[Power] cycle power profile" })
 {{- end }}

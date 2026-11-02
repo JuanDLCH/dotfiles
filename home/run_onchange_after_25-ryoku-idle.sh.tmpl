@@ -1,0 +1,16 @@
+{{- if and (eq .desktop "ryoku") (index .devices .device).laptop -}}
+#!/bin/sh
+# dotfiles: my idle policy in Ryoku's power.json (same numbers as
+# ~/.config/juandy/hypridle.conf on other desktops), then re-render Ryoku's idle daemon.
+# Battery: dim 60 s, lock 120 s, screen off 300 s, suspend 500 s.
+# AC:      dim 60 s, lock 120 s, screen off 300 s, never suspend.
+set -eu
+command -v ryoku-power >/dev/null || { echo "juandy: ryoku-power not found, idle policy skipped" >&2; exit 0; }
+for kv in \
+    battery.dimSec=60 battery.lockSec=120 battery.screenOffSec=300 battery.suspendSec=500 \
+    ac.dimSec=60 ac.lockSec=120 ac.screenOffSec=300 ac.suspendSec=0; do
+    ryoku-power idle set "${kv%%=*}" "${kv#*=}"
+done
+ryoku-idle apply || true
+echo "juandy: Ryoku idle policy applied"
+{{- end }}

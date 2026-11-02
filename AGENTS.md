@@ -25,8 +25,9 @@ ls ~/.config/hypr/hyprland.lua ~/.config/hypr/hyprland.conf 2>/dev/null
 command -v hyde-shell && echo HyDE                  # HyDE uses hyprland.lua
 ```
 
-- `hyprland.lua` present → desktop `hyprland-lua`.
-- Only `hyprland.conf` (CachyOS, Ryoku, vanilla Hyprland) → `hyprland-conf`. If the distro keeps
+- `ryoku-shell` on PATH → desktop `ryoku` (Lua config; see README "Ryoku" for what changes).
+- `hyprland.lua` present (HyDE) → desktop `hyprland-lua`.
+- Only `hyprland.conf` (CachyOS's default Hyprland, vanilla) → `hyprland-conf`. If the distro keeps
   user overrides in another file that the main config sources (e.g. `userprefs.conf`), set
   `hypr_main = "/full/path"` under `[data]` in `~/.config/chezmoi/chezmoi.toml` and re-apply.
 - No Hyprland (GNOME, KDE…) → `none`: only dotfiles and packages apply; tell the user
@@ -49,7 +50,7 @@ chezmoi init --apply --source ~/.local/share/chezmoi \
   --promptString 'Git name=Juan Diego' --promptString Git\ email=you@example.com
 ```
 
-Prompt keys: `Device`, `Desktop` (`hyprland-lua|hyprland-conf|none`), `Suites` (names from `packages/suites/`, separated by spaces or `/`), `Git name`, `Git email`.
+Prompt keys: `Device`, `Desktop` (`ryoku|hyprland-lua|hyprland-conf|none`), `Suites` (names from `packages/suites/`, separated by spaces or `/`), `Git name`, `Git email`.
 Defaults come from detection (device from DMI, desktop from the hypr config present).
 
 ### Migrating a machine that already has these settings inline
@@ -73,7 +74,10 @@ file changes). Apps without a package for the distro fall back to flatpak or are
 skipped. Arch: uses `paru`/`yay` if present (AUR names in the manifests), else `pacman`. Gaming
 on Arch needs `[multilib]` enabled.
 
-## 4. Hypridle (manual merge)
+## 4. Hypridle (manual merge; not on Ryoku)
+
+On Ryoku this step is automatic: `run_onchange_after_25-ryoku-idle.sh` writes the same policy with
+`ryoku-power idle set` and runs `ryoku-idle apply`.
 
 `~/.config/juandy/hypridle.conf` holds the idle policy (dim 60 s, lock 120 s, screen off 300 s,
 suspend 500 s on battery only). hypridle cannot include files, so merge its `listener` blocks

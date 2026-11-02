@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Ryoku lid policy with one change (managed by chezmoi, dotfiles repo):
+#   on AC with no external display, closing the lid locks and turns the panel off,
+#   and background work keeps running. Unplugging while closed suspends.
+# Every other case (battery, docked clamshell, open, login sync) is ryoku-clamshell's.
+#   ryoku-lid close|open|sync
+set -u
+
+STATE="${XDG_RUNTIME_DIR:-/tmp}/ryoku-lid.awake"
+
+on_ac() {   # any non-battery supply online (Mains, USB-C PD...)
+    local ps
+    for ps in /sys/class/power_supply/*; do
+        [[ -r $ps/type && -r $ps/online ]] || continue
+        [[ $(<"$ps/type") != Battery && $(<"$ps/online") == 1 ]] && return 0
+    done
+    return 1
+}
+external_connected() {
+    hyprctl monitors all -j 2>/dev/null |
+        jq -e 'any(.[]; .name | test("^(eDP|LVDS|DSI)") | not)' >/dev/null
+}
+lid_closed() { grep -qs closed /proc/acpi/button/lid/*/state; }
+keep_awake() { on_ac && ! external_connected; }
+
+# While closed in keep-awake mode: suspend as soon as AC goes away, stop on open.
+watch_unplug() {
+    while [[ -e $STATE ]] && lid_closed; do
+        if ! on_ac; then
+            rm -f "$STATE"
+            ryoku-shell suspend
+            return
+        fi
+        sleep 2
+    done
+}
+
+case ${1:-} in
+    close)
+        if keep_awake; then
+            : >"$STATE"
+            ryoku-shell lock
+            sleep 1
+            ryoku-idle output-off
+            setsid -f "$0" watch >/dev/null 2>&1
+        else
+            exec ryoku-clamshell lid close
+        fi ;;
+    open)
+        if [[ -e $STATE ]]; then
+            rm -f "$STATE"
+            ryoku-idle output-on
+        fi
+        exec ryoku-clamshell lid open ;;
+    sync)
+        # Logging in with the lid already closed on AC: stay up instead of suspending.
+        if lid_closed && keep_awake; then exec "$0" close; fi
+        exec ryoku-clamshell lid sync ;;
+    watch) watch_unplug ;;
+    *) sed -n '2,6p' "$0"; exit 2 ;;
+esac

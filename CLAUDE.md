@@ -13,8 +13,12 @@ Three axes, each resolved in a different place:
 - **Device** (`msi-modern15`, `generic`, …): hardware facts in `home/.chezmoidata/devices.yaml`.
   Templates do `{{ $dev := index .devices .device }}` and read `$dev.laptop`, `$dev.fn_keys`,
   `$dev.touchpad`, etc. `home/.chezmoiignore` drops `hw` / `lid-lock` on devices without them.
-- **Desktop** (`hyprland-lua` | `hyprland-conf` | `none`): which keybind file gets installed
-  (`home/dot_config/hypr/juandy.lua.tmpl` vs `juandy.conf.tmpl`). It also switches how scripts
+- **Desktop** (`ryoku` | `hyprland-lua` | `hyprland-conf` | `none`): which keybind file gets installed
+  (`home/dot_config/hypr/juandy.lua.tmpl` vs `juandy.conf.tmpl`). `ryoku` reuses the Lua file with
+  `{{ if $ryoku }}` branches that defer to Ryoku's own commands (`ryoku-shell`, `ryoku wm act`,
+  `ryoku-power`), includes from `user.lua`, and swaps `lid-lock` for the `user_edits` lid overlay +
+  `ryoku-lid`. Ryoku sources were read from github.com/Ryoku-dev/ryoku (`ryoku/hyprland/`,
+  `system/hardware/power/ryoku-{clamshell,idle,power}`); re-check them if Ryoku changes. It also switches how scripts
   talk to Hyprland: Lua-config Hyprland takes `hyprctl eval "hl.…"` and
   `hyprctl dispatch 'hl.dsp.…'`, while classic config takes `hyprctl keyword …` and `dispatch dpms on|off`.
   See `hypr()`, `mon_set()` and `tp_apply()` in `executable_hw.tmpl`, plus `screen()` in `lid-lock`.

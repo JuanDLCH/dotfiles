@@ -12,7 +12,7 @@ set -u
 TOUCHPAD='{{ $dev.touchpad }}'
 CAM_ID='{{ $dev.camera_usb }}'
 SCALE='{{ $dev.internal_scale }}'
-HYPR_CONFIG='{{ if eq .desktop "hyprland-conf" }}conf{{ else }}lua{{ end }}'   # how to talk to hyprctl
+HYPR_CONFIG='{{ if eq .desktop "hyprland-conf" }}conf{{ else }}lua{{ end }}'   # how to talk to hyprctl (Ryoku and HyDE: lua)
 STATE="${XDG_RUNTIME_DIR:-/tmp}/hw-keys"
 mkdir -p "$STATE"
 

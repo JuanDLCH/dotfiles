@@ -1,18 +1,22 @@
 {{- $dev := index .devices .device -}}
 {{- /* Paths here are target paths (relative to $HOME) that this machine skips. */ -}}
 
-{{- if ne .desktop "hyprland-lua" }}
+{{- if not (has .desktop (list "hyprland-lua" "ryoku")) }}
 .config/hypr/juandy.lua
 {{- end }}
 {{- if ne .desktop "hyprland-conf" }}
 .config/hypr/juandy.conf
 {{- end }}
-{{- if eq .desktop "none" }}
+{{- if has .desktop (list "none" "ryoku") }}
 .config/juandy/hypridle.conf
+{{- end }}
+{{- if or (ne .desktop "ryoku") (not $dev.laptop) }}
+.config/ryoku
+.local/libexec/ryoku-lid
 {{- end }}
 {{- if not $dev.fn_keys }}
 .local/libexec/hw-keys
 {{- end }}
-{{- if not $dev.laptop }}
+{{- if or (not $dev.laptop) (eq .desktop "ryoku") }}
 .local/libexec/lid-lock
 {{- end }}

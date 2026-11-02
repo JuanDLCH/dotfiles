@@ -23,7 +23,7 @@ With chezmoi already installed, `chezmoi init --apply JuanDLCH` does the same (i
 | Prompt | Choices | Detected from |
 |---|---|---|
 | device | `msi-modern15`, `generic`, … | `/sys/class/dmi/id/product_name` |
-| desktop | `hyprland-lua` (HyDE), `hyprland-conf` (CachyOS, Ryoku, vanilla), `none` | `~/.config/hypr/hyprland.{lua,conf}` |
+| desktop | `ryoku`, `hyprland-lua` (HyDE), `hyprland-conf` (CachyOS default, vanilla), `none` | `ryoku-shell` on PATH, else `~/.config/hypr/hyprland.{lua,conf}` |
 | suites | `base`, `dev`, `desktop-apps`, `gaming`, `peripherals` | default `base` |
 | git name / email | | |
 
@@ -48,6 +48,16 @@ devices/
   _template/                start here for a new PC
 AGENTS.md                   instructions for an AI agent setting up a machine
 ```
+
+## Ryoku
+
+With `desktop = ryoku` the repo leans on Ryoku's own tools instead of mine: the include goes in
+`~/.config/hypr/user.lua` (Ryoku replaces `hyprland.lua` on updates), volume/brightness OSD,
+Super+P and the touchpad lock are Ryoku's, Super+L is `ryoku-shell suspend`, and the idle policy is
+written with `ryoku-power idle set`. The lid uses Ryoku's `user_edits` overlay
+(`~/.config/ryoku/user_edits/hypr/modules/lid.lua`) and `~/.local/libexec/ryoku-lid`. On AC with no
+external display, closing the lid only locks and turns the screen off. Every other case goes to
+`ryoku-clamshell`. `ryoku doctor` will report that overlay as a user edit; that is expected.
 
 ## Everyday use
 

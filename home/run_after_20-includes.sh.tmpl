@@ -32,6 +32,11 @@ hypr="$HOME/.config/hypr"
 main="$hypr/hyprland.lua"
 line='require("juandy")'
 check_old_copy "$main" "$line" && add_line "$main" "$line"
+{{- else if eq .desktop "ryoku" }}
+# Ryoku replaces hyprland.lua on updates; user.lua is the user's, loaded last.
+main="$hypr/user.lua"
+line='require("juandy")'
+check_old_copy "$main" "$line" && add_line "$main" "$line" create
 {{- else if eq .desktop "hyprland-conf" }}
 # Main config: override with `hypr_main = "..."` under [data] in ~/.config/chezmoi/chezmoi.toml
 main={{ if hasKey . "hypr_main" }}{{ .hypr_main | quote }}{{ else }}"$hypr/hyprland.conf"{{ end }}
