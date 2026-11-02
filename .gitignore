@@ -1,0 +1,7 @@
+# Secrets never go in this repo (tokens, OAuth clients, ssh keys).
+*.pem
+*.key
+.env
+.env.*
+credentials*.json
+token*.json
