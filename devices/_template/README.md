@@ -12,6 +12,7 @@ In `home/.chezmoidata/devices.yaml`:
     dmi: <cat /sys/class/dmi/id/product_name>   # enables auto-detection on init
     laptop: true|false        # true installs lid-lock (needs ac + lid)
     kb_layout: us
+    suites: base dev desktop-apps   # desktop PC: add gaming peripherals (USB dock/dongles)
     fn_keys: false            # true only after the ids below are filled and binds are added
     # touchpad: <hyprctl devices>
     # camera_usb: "<vendor> <product>"   # lsusb

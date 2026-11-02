@@ -1,6 +1,7 @@
-#: Daily GUI: terminal, browsers, ChatGPT
+#: Daily GUI: terminal, browsers, ChatGPT, VLC
 # name          | arch                    | debian          | fedora   | flatpak                 | note
 kitty           | kitty                   | kitty           | kitty    |                         | terminal
 firefox         | firefox                 | firefox-esr     | firefox  | org.mozilla.firefox     |
 google-chrome   | google-chrome           |                 |          | com.google.Chrome       | Arch: AUR
 chatgpt         | chatgpt-bin             |                 |          |                         | ChatGPT / Codex desktop client. Arch: AUR (unofficial)
+vlc             | vlc                     | vlc             |          | org.videolan.VLC        | Fedora: needs RPM Fusion, flatpak instead

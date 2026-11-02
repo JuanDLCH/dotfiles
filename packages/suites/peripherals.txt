@@ -1,7 +1,7 @@
-#: Mice, headsets, RGB, Bluetooth. Trim to the hardware you own.
-# name          | arch                                  | debian                    | fedora            | flatpak             | note
-bluetooth       | bluez bluez-utils blueman @script:bluetooth | bluez blueman @script:bluetooth | bluez blueman @script:bluetooth |   | enables bluetooth.service
-piper           | piper                                 | piper                     | piper             | org.freedesktop.Piper | gaming mice (libratbag: Logitech, Razer, SteelSeries...)
-solaar          | solaar                                | solaar                    | solaar            |                     | Logitech Unifying / Bolt receivers
-headsetcontrol  | headsetcontrol                        | headsetcontrol            | headsetcontrol    |                     | sidetone/battery/LEDs for many USB headsets
-openrgb         | openrgb                               |                           |                   | org.openrgb.OpenRGB | RGB control
+#: Razer mouse (OpenRazer), SteelSeries Arctis headset, Bluetooth. Needs the USB dock/dongle, not BT
+# name             | arch                                                    | debian                                    | fedora | flatpak | note
+bluetooth          | bluez bluez-utils @script:bluetooth                     | bluez @script:bluetooth                   | bluez @script:bluetooth |  | enables bluetooth.service
+openrazer          | openrazer-daemon openrazer-driver-dkms @script:openrazer | openrazer-meta @script:openrazer         |        |         | Basilisk V3 Pro + Mouse Dock Pro (DPI, lighting, battery). Fedora: openSUSE OBS repo
+polychromatic      | polychromatic                                           |                                           |        |         | GUI for OpenRazer. Arch: AUR
+headsetcontrol     | headsetcontrol                                          | headsetcontrol                            | headsetcontrol |  | Arctis: battery, sidetone, lights, inactive time (CLI)
+arctis-manager     | linux-arctis-manager                                    |                                           |        |         | Arctis: SteelSeries GG replacement (ChatMix, EQ, ANC). Arch: AUR

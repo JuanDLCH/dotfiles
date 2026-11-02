@@ -24,7 +24,7 @@ With chezmoi already installed, `chezmoi init --apply JuanDLCH` does the same (i
 |---|---|---|
 | device | `msi-modern15`, `generic`, … | `/sys/class/dmi/id/product_name` |
 | desktop | `ryoku`, `hyprland-lua` (HyDE), `hyprland-conf` (CachyOS default, vanilla), `none` | `ryoku-shell` on PATH, else `~/.config/hypr/hyprland.{lua,conf}` |
-| suites | `base`, `dev`, `desktop-apps`, `gaming`, `peripherals` | default `base` |
+| suites | `base`, `dev`, `desktop-apps`, `gaming`, `peripherals` | the device's `suites` in `devices.yaml`, else `base` |
 | git name / email | | |
 
 Answers are saved in `~/.config/chezmoi/chezmoi.toml`. To change them, run `chezmoi init --prompt`.

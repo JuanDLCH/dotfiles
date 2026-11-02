@@ -6,12 +6,15 @@
 #   kb_layout    XKB layout for the compositor
 #   fn_keys      installs the `hw` helper and the Fn-key binds (needs the ids below)
 #   internal_scale  scale used by `hw display` / `hw rotate` for the built-in panel
+#   suites       default answer for the Suites prompt (packages/suites/)
 #
 # Add a machine: copy devices/_template/README.md, add an entry here, run `chezmoi init`.
 devices:
   msi-modern15:
     description: MSI Modern 15 A5M (Ryzen 5 5500U) laptop
     dmi: Modern 15 A5M
+    # Mouse and headset reach this laptop over Bluetooth, so no peripherals suite.
+    suites: base dev desktop-apps
     laptop: true
     kb_layout: es
     fn_keys: true

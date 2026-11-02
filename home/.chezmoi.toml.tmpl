@@ -33,7 +33,8 @@
 {{- /* Stored as a comma-separated string: the Once/--prompt logic works reliably for strings. */ -}}
 {{- /* Any of `,` `/` or spaces separates names: "base dev", "base/dev" (CLI-safe), "base,dev".
        Available: base dev desktop-apps gaming peripherals (packages/suites/). */ -}}
-{{- $suites := promptStringOnce . "suites" "Suites" "base" -}}
+{{- $suitesDefault := get (index $devices $device) "suites" | default "base" -}}
+{{- $suites := promptStringOnce . "suites" "Suites" $suitesDefault -}}
 {{- $suites = regexReplaceAll "[\\s,/]+" $suites "," | trimAll "," -}}
 
 {{- $gitName := promptStringOnce . "git_name" "Git name" -}}
