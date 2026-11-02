@@ -1,0 +1,58 @@
+{{- $dev := index .devices .device -}}
+# my-linux-configs: personal keybinds and hardware keys for classic hyprland.conf
+# (CachyOS, Ryoku, vanilla Hyprland). Managed by chezmoi: edit
+# home/dot_config/hypr/my-linux.conf.tmpl in the repo, then `chezmoi apply`.
+# Sourced at the end of the main Hyprland config, so it overrides the distro's binds.
+# Device: {{ .device }}
+
+input {
+    kb_layout = {{ $dev.kb_layout }}
+}
+
+# Plain F-keys stay free for apps (F2 rename, F5 refresh...).
+unbind = , F10
+unbind = , F12
+
+# Super+L: lock and suspend. Idle and the lid only lock.
+unbind = SUPER, L
+bind = SUPER, L, exec, sh -c 'loginctl lock-session; sleep 1.5; systemctl suspend'
+
+# Super+F toggles maximized; F11 toggles real fullscreen.
+unbind = SUPER, F
+unbind = , F11
+unbind = SHIFT, F11
+unbind = ALT, RETURN
+bind = SUPER, F, fullscreen, 1
+bind = , F11, fullscreen, 0
+{{- if lookPath "swayosd-client" }}
+
+# OSD for volume, brightness and Caps Lock (SwayOSD is installed on this machine).
+unbind = , XF86AudioMute
+unbind = , XF86AudioLowerVolume
+unbind = , XF86AudioRaiseVolume
+unbind = , XF86MonBrightnessUp
+unbind = , XF86MonBrightnessDown
+bindl  = , XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
+bindel = , XF86AudioLowerVolume, exec, swayosd-client --output-volume -5
+bindel = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume +5
+bindel = , XF86MonBrightnessUp, exec, swayosd-client --brightness +5 --min-brightness 5
+bindel = , XF86MonBrightnessDown, exec, swayosd-client --brightness -5 --min-brightness 5
+bindrin = , Caps_Lock, exec, swayosd-client --caps-lock
+{{- end }}
+{{- if $dev.laptop }}
+
+# Closing the lid locks; it suspends only on battery.
+exec-once = ~/.local/libexec/lid-lock
+{{- end }}
+{{- if $dev.fn_keys }}
+
+# {{ $dev.description }}: Fn keys (table in devices/{{ .device }}/README.md).
+$hw = ~/.local/libexec/hw-keys/hw
+exec-once = $hw camera watch --osd
+bindl = CTRL SUPER, XF86TouchpadToggle, exec, $hw touchpad toggle
+bindl = , XF86TouchpadToggle, exec, $hw touchpad toggle
+bindl = , XF86RotateWindows, exec, $hw rotate
+unbind = SUPER, P
+bind  = SUPER, P, exec, $hw display
+bindl = , XF86Launch1, exec, $hw profile
+{{- end }}
