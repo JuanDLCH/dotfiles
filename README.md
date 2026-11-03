@@ -75,6 +75,7 @@ work on every machine and over every link (USB, dongle, Bluetooth). The Hyprland
 | Side forward | F17 | `code:195` | app launcher (as Super+Space) |
 | Side back | F18 | `code:196` | music player (as Super+J; Ryotunes on Ryoku) |
 | Hypershift + wheel tilt left / right / middle click | XF86AudioPrev / Next / Play | - | previous track / next track / play-pause (native, no binds) |
+| Hypershift + scroll up / down | XF86AudioRaiseVolume / LowerVolume | - | volume up / down (native, no binds) |
 
 On non-Ryoku desktops F17/F18 replay Super+Space / Super+J through `wtype` (only if installed), so
 they follow whatever the desktop binds there.
