@@ -16,6 +16,12 @@ panels, themes, launchers): only add the include lines this repo manages.
   edited a managed file live, use `chezmoi re-add` (non-template files) or port the change
   into the template by hand.
 
+## Restoring the owner's files
+
+If a USB labelled `BACKUP` is plugged in (or the owner mentions a backup), it holds
+`backup-pre-ryoku-2026-11-02.tar.zst` and `AGENT-RESTORE.md`. Read that file and follow it after
+this repo is applied: it says where each backed-up file goes (Claude/Codex memories, projects, settings).
+
 ## 1. Detect the machine
 
 ```bash

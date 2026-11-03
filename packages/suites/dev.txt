@@ -8,4 +8,5 @@ pnpm            | pnpm                                      | @script:pnpm      
 docker          | docker docker-compose docker-buildx @script:docker-post | docker.io docker-compose @script:docker-post | moby-engine docker-compose @script:docker-post | | adds you to the docker group (log out/in)
 vscode          | code                                      | @script:vscode                          | @script:vscode                          | com.visualstudio.code | Arch `code` is Code - OSS
 claude-code     | @script:claude                            | @script:claude                          | @script:claude                          |                       | official native installer
+codegraph       | @script:codegraph                         | @script:codegraph                       | @script:codegraph                       |                       | code graph + MCP for Claude Code (after claude-code)
 shellcheck      | shellcheck                                | shellcheck                              | ShellCheck                              |                       |
