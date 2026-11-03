@@ -14,6 +14,10 @@
 .config/ryoku
 .local/libexec/ryoku-lid
 {{- end }}
+{{- if ne .desktop "hyprland-lua" }}
+.config/hyde-qs
+.config/hyde/weather-location
+{{- end }}
 {{- if not $dev.fn_keys }}
 .local/libexec/hw-keys
 {{- end }}
