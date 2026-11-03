@@ -24,6 +24,17 @@ unbind = SHIFT, F11
 unbind = ALT, RETURN
 bind = SUPER, F, fullscreen, 1
 bind = , F11, fullscreen, 0
+
+# Razer Basilisk V3 Pro: extra buttons send F13-F18 from the mouse's onboard memory (table in
+# README.md). XKB turns them into XF86Tools/XF86Launch5-9, so bind the keycodes.
+bind = , code:191, workspace, r-1
+bind = , code:192, workspace, r+1
+bind = , code:193, fullscreen, 1
+bind = , code:194, exec, kitty
+{{- if lookPath "wtype" }}
+bind = , code:195, exec, wtype -M logo -k space -m logo
+bind = , code:196, exec, wtype -M logo -k j -m logo
+{{- end }}
 {{- if lookPath "swayosd-client" }}
 
 # OSD for volume, brightness and Caps Lock (SwayOSD is installed on this machine).

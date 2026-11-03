@@ -59,6 +59,31 @@ written with `ryoku-power idle set`. The lid uses Ryoku's `user_edits` overlay
 external display, closing the lid only locks and turns the screen off. Every other case goes to
 `ryoku-clamshell`. `ryoku doctor` will report that overlay as a user edit; that is expected.
 
+## Mouse (Razer Basilisk V3 Pro)
+
+The extra buttons are mapped in Synapse to F13-F18, stored in the mouse's onboard memory, so they
+work on every machine and over every link (USB, dongle, Bluetooth). The Hyprland binds in
+`juandy.{lua,conf}.tmpl` bind them by keycode, because XKB turns F13-F18 into
+`XF86Tools`/`XF86Launch5-9`.
+
+| Button | Sends | Keycode | Action |
+|---|---|---|---|
+| Wheel tilt left | F13 | `code:191` | previous workspace |
+| Wheel tilt right | F14 | `code:192` | next workspace |
+| Hypershift + left click | F15 | `code:193` | toggle maximize (as Super+F) |
+| Hypershift + right click | F16 | `code:194` | terminal |
+| Side forward | F17 | `code:195` | app launcher (as Super+Space) |
+| Side back | F18 | `code:196` | music player (as Super+J; Ryotunes on Ryoku) |
+| Media buttons (set in Synapse) | XF86Audio* | - | native, no binds |
+
+On non-Ryoku desktops F17/F18 replay Super+Space / Super+J through `wtype` (only if installed), so
+they follow whatever the desktop binds there.
+
+**Bluetooth drops** (reconnecting every few seconds, `Connection Timeout (0x08)` in `btmon`, with a
+MediaTek MT7921 controller): the cause was outdated mouse firmware. Update it with Razer's
+Basilisk V3 Pro Firmware Updater (Windows, over the USB cable), then re-pair. Turning off WiFi
+power save, ASPM or mt76 runtime PM didn't fix it.
+
 ## Everyday use
 
 ```bash

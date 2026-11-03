@@ -48,6 +48,29 @@ hl.unbind("ALT + RETURN")
 hl.bind("SUPER + F", function() toggle_state(1) end, { description = "[Window Management] toggle maximize" })
 hl.bind("F11", function() toggle_state(2) end, { description = "[Window Management] toggle fullscreen" })
 {{- end }}
+
+-- Razer Basilisk V3 Pro: extra buttons send F13-F18 from the mouse's onboard memory (set once in
+-- Synapse; table in README.md). The XKB layout turns F13-F18 into XF86Tools/XF86Launch5-9,
+-- so bind the keycodes (evdev KEY_F13 = 183, +8 = XKB 191).
+for _, b in ipairs({
+    { "code:191", hl.dsp.focus({ workspace = "r-1" }), "previous workspace (wheel tilt left)" },
+    { "code:192", hl.dsp.focus({ workspace = "r+1" }), "next workspace (wheel tilt right)" },
+{{- if $ryoku }}
+    { "code:193", hl.dsp.window.fullscreen({ mode = "maximized" }), "toggle maximize (Hypershift + left click)" },
+    { "code:194", hl.dsp.exec_cmd("ryoku-app terminal"), "terminal (Hypershift + right click)" },
+    { "code:195", hl.dsp.global("ryoku:launcher"), "app launcher, as Super+Space (side forward)" },
+    { "code:196", hl.dsp.exec_cmd("ryotunes"), "music player, as Super+J (side back)" },
+{{- else }}
+    { "code:193", function() toggle_state(1) end, "toggle maximize (Hypershift + left click)" },
+    { "code:194", hl.dsp.exec_cmd("kitty"), "terminal (Hypershift + right click)" },
+{{- if lookPath "wtype" }}
+    { "code:195", hl.dsp.exec_cmd("wtype -M logo -k space -m logo"), "Super+Space (side forward)" },
+    { "code:196", hl.dsp.exec_cmd("wtype -M logo -k j -m logo"), "Super+J (side back)" },
+{{- end }}
+{{- end }}
+}) do
+    hl.bind(b[1], b[2], { description = "[Mouse] " .. b[3] })
+end
 {{- if and (not $ryoku) (lookPath "swayosd-client") }}
 
 -- OSD for volume, brightness and Caps Lock (SwayOSD is installed on this machine).
