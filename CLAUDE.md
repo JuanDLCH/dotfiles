@@ -13,6 +13,7 @@ Three axes, each resolved in a different place:
 - **Device** (`msi-modern15`, `generic`, …): hardware facts in `home/.chezmoidata/devices.yaml`.
   Templates do `{{ $dev := index .devices .device }}` and read `$dev.laptop`, `$dev.fn_keys`,
   `$dev.touchpad`, etc. `home/.chezmoiignore` drops `hw` / `lid-lock` on devices without them.
+  `$dev.suites` is the default answer of the Suites prompt (read with `get`, since `generic` has none).
 - **Desktop** (`ryoku` | `hyprland-lua` | `hyprland-conf` | `none`): which keybind file gets installed
   (`home/dot_config/hypr/juandy.lua.tmpl` vs `juandy.conf.tmpl`). `ryoku` reuses the Lua file with
   `{{ if $ryoku }}` branches that defer to Ryoku's own commands (`ryoku-shell`, `ryoku wm act`,
@@ -39,7 +40,21 @@ Wiring:
   re-runs when a manifest changes.
 - Desktop-shell things (Quickshell, waybar, media helpers like `hw cover`) are deliberately out of
   scope and belong to the separate `hyde-quickshell-customizations` repo. `hw` only forwards
-  `cover|seek|focus-player` to a local `hw-media` or `hyde-qs-media`.
+  `cover|seek|focus-player` to a local `hw-media` or `hyde-qs-media`. That repo's waybar layout calls
+  `~/.local/libexec/hw-keys/hw` for the camera/touchpad/profile indicators, so keep `hw`'s
+  `camera watch`, `touchpad status` and `profile status` JSON output stable. The only HyDE-shell data
+  kept here is personal: `~/.config/hyde-qs/location.json` and `~/.config/hyde/weather-location`
+  (installed only for `hyprland-lua`).
+
+## Owner preferences (don't undo)
+
+- Suites stay minimal: what the owner actually uses. `desktop-apps` = kitty, Firefox, Chrome,
+  ChatGPT, VLC. No PWAs/firefoxpwa, Spotify, OpenCode or Hermes; ask before adding apps.
+- Peripherals: Razer Basilisk V3 Pro + Mouse Dock Pro (OpenRazer/Polychromatic) and a SteelSeries
+  Arctis Nova headset (HeadsetControl, linux-arctis-manager). They only work over the USB
+  dock/dongle, so the laptop (Bluetooth) doesn't get the `peripherals` suite; a desktop PC does.
+- Keybinds: Super+F maximize, F11 fullscreen, Super+L lock + suspend. On AC the lid and idle only
+  lock and turn the screen off, so background work keeps running. They suspend only on battery.
 
 ## Commands
 
