@@ -57,12 +57,12 @@ for _, b in ipairs({
     { "code:192", hl.dsp.focus({ workspace = "r+1" }), "next workspace (wheel tilt right)" },
 {{- if $ryoku }}
     { "code:193", hl.dsp.window.fullscreen({ mode = "maximized" }), "toggle maximize (Hypershift + left click)" },
-    { "code:194", hl.dsp.exec_cmd("ryoku-app terminal"), "terminal (Hypershift + right click)" },
+    { "code:194", hl.dsp.window.close(), "close window, as Super+Q (Hypershift + right click)" },
     { "code:195", hl.dsp.global("ryoku:launcher"), "app launcher, as Super+Space (side forward)" },
     { "code:196", hl.dsp.exec_cmd("ryotunes"), "music player, as Super+J (side back)" },
 {{- else }}
     { "code:193", function() toggle_state(1) end, "toggle maximize (Hypershift + left click)" },
-    { "code:194", hl.dsp.exec_cmd("kitty"), "terminal (Hypershift + right click)" },
+    { "code:194", hl.dsp.window.close(), "close window, as Super+Q (Hypershift + right click)" },
 {{- if lookPath "wtype" }}
     { "code:195", hl.dsp.exec_cmd("wtype -M logo -k space -m logo"), "Super+Space (side forward)" },
     { "code:196", hl.dsp.exec_cmd("wtype -M logo -k j -m logo"), "Super+J (side back)" },

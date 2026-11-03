@@ -71,10 +71,10 @@ work on every machine and over every link (USB, dongle, Bluetooth). The Hyprland
 | Wheel tilt left | F13 | `code:191` | previous workspace |
 | Wheel tilt right | F14 | `code:192` | next workspace |
 | Hypershift + left click | F15 | `code:193` | toggle maximize (as Super+F) |
-| Hypershift + right click | F16 | `code:194` | terminal |
+| Hypershift + right click | F16 | `code:194` | close window (as Super+Q) |
 | Side forward | F17 | `code:195` | app launcher (as Super+Space) |
 | Side back | F18 | `code:196` | music player (as Super+J; Ryotunes on Ryoku) |
-| Media buttons (set in Synapse) | XF86Audio* | - | native, no binds |
+| Hypershift + wheel tilt left / right / middle click | XF86AudioPrev / Next / Play | - | previous track / next track / play-pause (native, no binds) |
 
 On non-Ryoku desktops F17/F18 replay Super+Space / Super+J through `wtype` (only if installed), so
 they follow whatever the desktop binds there.
