@@ -22,6 +22,12 @@ external_connected() {
 }
 lid_closed() { grep -qs closed /proc/acpi/button/lid/*/state; }
 keep_awake() { on_ac && ! external_connected; }
+# Hibernate locks first and calls systemctl ~3s later; a lid close in that gap must not turn it into a suspend.
+hibernating() {
+    pgrep -f '^(ryoku-host power|systemctl) hibernate' >/dev/null ||
+        [[ $(busctl get-property org.freedesktop.login1 /org/freedesktop/login1 \
+            org.freedesktop.login1.Manager PreparingForSleep 2>/dev/null) == "b true" ]]
+}
 
 # While closed in keep-awake mode: suspend as soon as AC goes away, stop on open.
 watch_unplug() {
@@ -37,7 +43,9 @@ watch_unplug() {
 
 case ${1:-} in
     close)
-        if keep_awake; then
+        if hibernating; then
+            exit 0
+        elif keep_awake; then
             : >"$STATE"
             ryoku-shell lock
             sleep 1
