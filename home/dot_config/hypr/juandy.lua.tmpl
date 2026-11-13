@@ -21,13 +21,14 @@ hl.config({
 -- Plain F-keys stay free for apps (F2 rename, F5 refresh...); media keys send XF86 codes.
 for _, key in ipairs({ "F10", "F12" }) do hl.unbind(key) end
 
--- Super+L: lock and suspend. Idle and the lid only lock on AC.
+-- Super+L: lock and turn the screen off, never suspend, so background work keeps running.
+-- A key or the mouse wakes the screen (key_press_enables_dpms). The lid suspends on battery.
 hl.unbind("SUPER + L")
 {{- if $ryoku }}
-hl.bind("SUPER + L", hl.dsp.exec_cmd("ryoku-shell suspend"), { description = "[Session] lock and suspend" })
+hl.bind("SUPER + L", hl.dsp.exec_cmd("sh -c 'ryoku-shell lock; sleep 1; ryoku-idle output-off'"), { description = "[Session] lock and screen off" })
 {{- else }}
-hl.bind("SUPER + L", hl.dsp.exec_cmd("sh -c 'loginctl lock-session; sleep 1.5; systemctl suspend'"),
-    { description = "[Session] lock and suspend" })
+hl.bind("SUPER + L", hl.dsp.exec_cmd([[sh -c 'loginctl lock-session; sleep 1; hyprctl dispatch "hl.dsp.dpms({ action = \"disable\" })"']]),
+    { description = "[Session] lock and screen off" })
 {{- end }}
 
 -- Super+F toggles maximized <-> normal; F11 toggles real fullscreen.

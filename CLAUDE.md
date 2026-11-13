@@ -53,7 +53,7 @@ Wiring:
 - Peripherals: Razer Basilisk V3 Pro + Mouse Dock Pro (OpenRazer/Polychromatic) and a SteelSeries
   Arctis Nova headset (HeadsetControl, linux-arctis-manager). They only work over the USB
   dock/dongle, so the laptop (Bluetooth) doesn't get the `peripherals` suite; a desktop PC does.
-- Keybinds: Super+F maximize, F11 fullscreen, Super+L lock + suspend. On AC the lid and idle only
+- Keybinds: Super+F maximize, F11 fullscreen, Super+L lock + screen off, never suspends (AC or battery). On AC the lid and idle only
   lock and turn the screen off, so background work keeps running. They suspend only on battery.
 
 ## Commands

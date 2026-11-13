@@ -53,7 +53,7 @@ AGENTS.md                   instructions for an AI agent setting up a machine
 
 With `desktop = ryoku` the repo leans on Ryoku's own tools instead of mine: the include goes in
 `~/.config/hypr/user.lua` (Ryoku replaces `hyprland.lua` on updates), volume/brightness OSD,
-Super+P and the touchpad lock are Ryoku's, Super+L is `ryoku-shell suspend`, and the idle policy is
+Super+P and the touchpad lock are Ryoku's, Super+L is `ryoku-shell lock` + `ryoku-idle output-off` (no suspend), and the idle policy is
 written with `ryoku-power idle set`. The lid uses Ryoku's `user_edits` overlay
 (`~/.config/ryoku/user_edits/hypr/modules/lid.lua`) and `~/.local/libexec/ryoku-lid`. On AC with no
 external display, closing the lid only locks and turns the screen off. Every other case goes to
