@@ -13,9 +13,9 @@ input {
 unbind = , F10
 unbind = , F12
 
-# Super+L: lock and suspend. Idle and the lid only lock.
+# Super+L: lock and turn the screen off (no suspend); a key or the mouse wakes it.
 unbind = SUPER, L
-bind = SUPER, L, exec, sh -c 'loginctl lock-session; sleep 1.5; systemctl suspend'
+bind = SUPER, L, exec, sh -c 'loginctl lock-session; sleep 1; hyprctl dispatch dpms off'
 
 # Super+F toggles maximized; F11 toggles real fullscreen.
 unbind = SUPER, F
