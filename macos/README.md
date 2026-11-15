@@ -16,6 +16,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
+| `borders/bordersrc` | `~/.config/borders/bordersrc` |
 | `fastfetch/config.jsonc`, `fastfetch/memory.sh` | `~/.config/fastfetch/` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
 
 ## What's installed
@@ -30,6 +31,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | gh | Homebrew core | none | GitHub CLI |
 | fastfetch | Homebrew core | none | system info + image when Kitty opens |
 | btop | Homebrew core | none | resource monitor (CPU, memory, disks, network, processes) |
+| [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | orange border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
@@ -112,6 +114,9 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   is drawn at the old size (squashed, text scrolled). `zshrc` waits until `stty size` is stable.
   `~/.hushlogin` hides the "Last login" line.
 
+- Dimming or making inactive windows translucent (Hyprland `inactive_opacity`) needs SIP off.
+  The focused window gets a border from JankyBorders instead.
+
 ### Tried and dropped
 
 - **yabai + skhd** (from an earlier ChatGPT session): works without SIP but needed patches for
@@ -125,10 +130,10 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 ```bash
 brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch btop
 brew install --cask font-jetbrains-mono-nerd-font nordpass
-brew install acsandmann/tap/rift asmvik/formulae/skhd
+brew install acsandmann/tap/rift asmvik/formulae/skhd FelixKratz/formulae/borders
 
 d=~/dotfiles/macos   # this folder
-mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty ~/.config/fastfetch
+mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty ~/.config/fastfetch ~/.config/borders
 cp $d/rift/config.toml ~/.config/rift/
 cp $d/skhd/skhdrc ~/.skhdrc && cp $d/skhd/*.sh ~/.config/skhd/ && chmod +x ~/.config/skhd/*.sh
 cp $d/kitty/*.conf ~/.config/kitty/
@@ -137,6 +142,8 @@ cp $d/fastfetch/* ~/.config/fastfetch/   # plus your own logo.png
 
 rift service install && rift service start   # then allow rift in Accessibility, `rift service restart`
 skhd --start-service                         # allow skhd in Accessibility and Screen Recording
+cp $d/borders/bordersrc ~/.config/borders/ && chmod +x ~/.config/borders/bordersrc
+brew services start felixkratz/formulae/borders
 ```
 
 After editing a live file, copy it back here so this folder stays current.

@@ -1,0 +1,12 @@
+#!/bin/bash
+# JankyBorders: borde en la ventana activa. Colores 0xAARRGGBB.
+#   active   = naranja Gruvbox (combina con el prompt de Starship)
+#   inactive = transparente (sin borde)
+options=(
+  style=round
+  width=4.0
+  hidpi=on
+  active_color=0xfffe8019
+  inactive_color=0x00000000
+)
+borders "${options[@]}"
