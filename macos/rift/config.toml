@@ -24,7 +24,7 @@ default_disable = false   # Rift maneja todos los escritorios
 # - mouse_hides_on_focus: hide the mouse cursor after focusing a window
 # 	(this only works with mouse_follows_focus=true)
 focus_follows_mouse = true
-mouse_follows_focus = false
+mouse_follows_focus = true
 mouse_hides_on_focus = false
 # Treat displays stacked in macOS as a horizontal mouse crossing chain when
 # they are physically side-by-side. At a left/right edge, the cursor enters
