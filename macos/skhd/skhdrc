@@ -1,0 +1,28 @@
+# skhd — atajos para abrir apps. "alt" = Option (⌥).
+# Recargar: skhd --reload          Logs: /tmp/skhd_$USER.err.log
+# Ventanas: Rift (~/.config/rift/config.toml). Aquí solo apps, capturas y botones del mouse.
+#
+# Teclado Latin American: Option+Q escribe "@" → NUNCA usar "alt - q" aquí.
+
+# ===== Aplicaciones =====
+alt - t    : open -na kitty --args --single-instance -d ~   # vía open: Kitty es dueño de sus permisos
+alt - b    : open -a "Safari"
+alt - e    : open ~
+alt - v    : open -a "Visual Studio Code"
+alt - c    : open -a "Claude"
+alt - j    : open -a "Spotify"
+alt - 0x2B : open -a "System Settings"                      # Option + ,
+
+
+# ===== Captura =====
+alt - s    : ~/.config/skhd/screenshot.sh                   # monitor bajo el mouse → portapapeles
+alt + shift - s : ~/.config/skhd/screenshot-area.sh         # área / Espacio = ventana → portapapeles (pausa el foco de Rift)
+
+# ===== Mouse Razer Basilisk V3 Pro (F13–F18 en la memoria del mouse) =====
+# Mismo mapeo que en Hyprland (repo dotfiles, README → "Mouse").
+f13 : /opt/homebrew/bin/rift-cli execute workspace prev                      # rueda inclinada ←: escritorio anterior
+f14 : /opt/homebrew/bin/rift-cli execute workspace next                      # rueda inclinada →: escritorio siguiente
+f15 : /opt/homebrew/bin/rift-cli execute window toggle-fullscreen-within-gaps   # Hypershift + clic izq: maximizar
+f16 : /opt/homebrew/bin/rift-cli execute window close                        # Hypershift + clic der: cerrar ventana
+f17 : ~/.config/skhd/screenshot-area.sh                                     # lateral adelante: captura de área (como ⌥⇧S)
+f18 : open -a "Spotify"                                                      # lateral atrás: música

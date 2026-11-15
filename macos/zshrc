@@ -1,0 +1,40 @@
+# ~/.zshrc — configuración de la terminal
+# Las herramientas vienen de Homebrew (/opt/homebrew).
+
+# ---------- Historial ----------
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt SHARE_HISTORY          # compartir historial entre pestañas
+setopt HIST_IGNORE_ALL_DUPS   # sin duplicados
+setopt HIST_IGNORE_SPACE      # comandos que empiezan con espacio no se guardan
+setopt HIST_REDUCE_BLANKS
+
+# ---------- Comodidad ----------
+setopt AUTO_CD                # escribir una carpeta = entrar en ella
+setopt INTERACTIVE_COMMENTS
+bindkey -e                    # atajos estilo emacs (Ctrl+A, Ctrl+E, etc.)
+
+# ---------- Autocompletado ----------
+autoload -Uz compinit && compinit
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'   # sin distinguir mayúsculas
+zstyle ':completion:*' menu select                        # menú navegable con flechas
+
+# ---------- Herramientas ----------
+eval "$(starship init zsh)"   # prompt
+eval "$(zoxide init zsh)"     # z <carpeta> / zi para elegir
+source <(fzf --zsh)           # Ctrl+R historial, Ctrl+T archivos, Alt+C carpetas
+
+# ---------- Alias ----------
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -l --icons --git --group-directories-first'
+alias la='eza -la --icons --git --group-directories-first'
+alias tree='eza --tree --icons --level=2'
+alias cat='bat --paging=never'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias reload='source ~/.zshrc'
+
+# ---------- Plugins (deben ir al final) ----------
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

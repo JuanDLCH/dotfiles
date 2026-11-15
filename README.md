@@ -8,6 +8,8 @@ preferences on top: one include line in the distro's configs, never an overwrite
 Quickshell/waybar desktop lives in a separate repo,
 [hyde-quickshell-customizations](https://github.com/JuanDLCH/hyde-quickshell-customizations).
 
+The company MacBook is documented separately in [`macos/`](macos/README.md) (not managed by chezmoi).
+
 ## Quick start
 
 ```bash
