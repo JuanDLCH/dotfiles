@@ -29,6 +29,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | skhd | `asmvik/formulae/skhd` | Accessibility, Screen Recording | app shortcuts, screenshots, mouse buttons |
 | gh | Homebrew core | none | GitHub CLI |
 | fastfetch | Homebrew core | none | system info + image when Kitty opens |
+| btop | Homebrew core | none | resource monitor (CPU, memory, disks, network, processes) |
 | NordPass | cask `nordpass` | none | passwords |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
@@ -122,7 +123,7 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 ## Restore
 
 ```bash
-brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch
+brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch btop
 brew install --cask font-jetbrains-mono-nerd-font nordpass
 brew install acsandmann/tap/rift asmvik/formulae/skhd
 
