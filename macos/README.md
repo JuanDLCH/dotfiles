@@ -39,7 +39,7 @@ Music in the menu bar is native: System Settings → Menu Bar → Now Playing �
 ## Window manager: Rift
 
 BSP (dwindle-like) tiling, 10 px gaps, animations, focus follows mouse and the mouse follows
-keyboard focus (centred on the window), 4 workspaces **per
+keyboard focus (centred on the window, then hidden until it moves), 4 workspaces **per
 display**, layout preview in the menu bar, 3-finger swipe between workspaces. Settings, Calculator,
 Activity Monitor, Archive Utility and Finder dialogs float.
 

@@ -25,7 +25,7 @@ default_disable = false   # Rift maneja todos los escritorios
 # 	(this only works with mouse_follows_focus=true)
 focus_follows_mouse = true
 mouse_follows_focus = true
-mouse_hides_on_focus = false
+mouse_hides_on_focus = true
 # Treat displays stacked in macOS as a horizontal mouse crossing chain when
 # they are physically side-by-side. At a left/right edge, the cursor enters
 # the logical neighbor at the same vertical offset, if that point exists.
