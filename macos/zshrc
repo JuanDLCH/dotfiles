@@ -52,5 +52,11 @@ if [[ $TERM == xterm-kitty && -o interactive ]]; then
       prev=$cur; sleep 0.1
     done
   }
-  fastfetch
+  # Imagen según el ancho de la ventana (texto ~46 col + imagen + márgenes), para que no se parta.
+  local cols=$(tput cols 2>/dev/null || echo 120)
+  if   (( cols >= 90 )); then fastfetch
+  elif (( cols >= 72 )); then fastfetch --logo-width 24 --logo-height 14
+  elif (( cols >= 62 )); then fastfetch --logo-width 16 --logo-height 9
+  else                        fastfetch --logo none
+  fi
 fi

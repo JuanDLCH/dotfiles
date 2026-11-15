@@ -16,7 +16,7 @@
     "break",
     "title",
     "separator",
-    { "type": "os",       "key": "󰀵 OS" },
+    { "type": "os",       "key": "󰀵 OS", "format": "{name} {codename} {version}" },
     { "type": "host",     "key": "󰌢 Host" },
     { "type": "kernel",   "key": " Kernel" },
     { "type": "uptime",   "key": "󰅐 Uptime" },
@@ -25,11 +25,11 @@
     { "type": "terminal", "key": " Terminal" },
     { "type": "wm",       "key": " WM" },
     "break",
-    { "type": "cpu",      "key": " CPU" },
-    { "type": "gpu",      "key": "󰢮 GPU" },
+    { "type": "cpu",      "key": " CPU", "format": "{name} ({cores-physical})" },
+    { "type": "gpu",      "key": "󰢮 GPU", "format": "{name} ({core-count})" },
     { "type": "command",  "key": " Memory", "text": "~/.config/fastfetch/memory.sh" },   // presión real, no la caché
-    { "type": "disk",     "key": "󰋊 Disk" },
-    { "type": "battery",  "key": "󰁹 Battery" },
+    { "type": "disk",     "key": "󰋊 Disk", "format": "{size-used} / {size-total} ({size-percentage})" },
+    { "type": "battery",  "key": "󰁹 Battery", "format": "{capacity} {status}" },
     "break",
     "colors"
   ]
