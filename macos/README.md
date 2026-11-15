@@ -12,7 +12,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 |---|---|
 | `rift/config.toml`, `rift/fit-min-size.sh` | `~/.config/rift/` |
 | `skhd/skhdrc` | `~/.skhdrc` |
-| `skhd/screenshot.sh`, `skhd/screenshot-area.sh` | `~/.config/skhd/` |
+| `skhd/open-here.sh`, `skhd/screenshot.sh`, `skhd/screenshot-area.sh` | `~/.config/skhd/` |
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
@@ -73,6 +73,10 @@ Opt = Option (⌥). On the Latin American layout **Opt+Q types `@`**, so it is n
 | Opt+T | new Kitty window (`open -na … --single-instance`, see gotchas) |
 | Opt+B / E / V / C / J | Safari / Finder (new window) / VS Code / Claude / Spotify |
 | Opt+, | System Settings |
+
+App shortcuts go through `open-here.sh`: if the app's **new** window lands on another display
+(macOS reopens apps where they were last, or next to their other window), it is moved to the
+display under the mouse. Activating an app that is already open moves nothing.
 | Opt+L | sleep (`pmset sleepnow`; Ctrl+Cmd+Q only locks) |
 | Opt+S | screenshot of the display under the mouse → clipboard |
 | Opt+Shift+S | area screenshot (Space = pick a window) → clipboard; pauses Rift's focus-follows-mouse while picking |
@@ -115,7 +119,7 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   through `screenshot-area.sh` instead of the native shortcut.
 - **Rift's BSP isn't quite dwindle**: a split keeps its orientation when a window closes, so
   closing the left window left two windows stacked full-width (rows). `fit-min-size.sh` also
-  re-orients every split by its shape (wider than tall → side by side, else stacked) on each
+  re-orients every split by its shape (at least 1.5× wider than tall → side by side, else stacked, so a 16:9 display never gets a 3rd column; Hyprland's `split_width_multiplier`) on each
   `windows_changed`, which is what Hyprland's dwindle does. Master-stack was tried and isn't
   dwindle (a 4th window stacks instead of splitting beside).
 - **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall, more with

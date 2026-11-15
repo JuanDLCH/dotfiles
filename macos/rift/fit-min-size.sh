@@ -60,14 +60,15 @@ pause() {
 }
 
 # ---------- Dwindle: cada división sigue la forma de su espacio ----------
-# Ancho ≥ alto → lado a lado; más alto que ancho → arriba/abajo. Así, al cerrar una ventana
+# Ancho ≥ 1.5 × alto → lado a lado; si no → arriba/abajo (máx. 2 columnas en un monitor 16:9,
+# como split_width_multiplier en Hyprland). Así, al cerrar una ventana
 # la que queda no se queda en "filas" (p. ej. cerrar la izquierda deja 2 apiladas a lo ancho).
 # Imprime el id JSON de una ventana hija directa de la primera división mal orientada.
 misoriented() {
   $R query layout --display "$1" 2>/dev/null | $J -c '
     [ .container_tree | recurse(.children[]?)
       | select(.node_type == "container" and (.children | length) >= 2)
-      | (if .frame.size.width >= .frame.size.height then "horizontal" else "vertical" end) as $want
+      | (if .frame.size.width >= 1.5 * .frame.size.height then "horizontal" else "vertical" end) as $want
       | select(.layout_kind == "horizontal" or .layout_kind == "vertical")
       | select(.layout_kind != $want)
       | [ .children[] | select(.node_type == "window") | .window_id ] | first // empty
