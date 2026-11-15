@@ -36,11 +36,16 @@ delta_for() {  # $1 = uuid del monitor
 
 focused=$($R query workspaces | $J -r '.[] | select(.is_focused) | .display_uuid' | head -1)
 
+prev=""   # uuid:signo de la corrección anterior, para detectar ida y vuelta
 for pass in 1 2 3; do
   changed=0
   for uuid in $($R query displays | $J -r '.[].uuid'); do
     d=$(delta_for "$uuid")
     case "$d" in 0|0.0|"") continue ;; esac
+    sign=$(echo "$d" | cut -c1); [ "$sign" = "-" ] || sign="+"
+    # Si ahora corrige al revés que antes, las dos apps no caben juntas: no insistir.
+    case "$prev" in *"$uuid:"*) case "$prev" in *"$uuid:$sign"*) ;; *) continue ;; esac ;; esac
+    prev="$prev $uuid:$sign"
     # adjust-master-ratio actúa sobre el monitor enfocado
     switched=0
     if [ "$uuid" != "$focused" ]; then

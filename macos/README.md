@@ -54,7 +54,7 @@ Activity Monitor, Archive Utility and Finder dialogs float.
 | Opt+F / Opt+Shift+F | maximize within gaps / without gaps |
 | Opt+Shift+Space | float ↔ tile |
 | Opt+Shift+J | toggle split orientation |
-| Opt+Shift+0 | balance sizes |
+| Opt+Shift+0 | balance sizes, then re-fit to minimum widths |
 | Opt+Shift+. / Opt+Shift+, | grow / shrink (`=`/`-` are elsewhere on the Latin American layout) |
 | Opt + drag | move a window (drop in the centre to swap) |
 | Opt+Z | pause Rift on the current space |
