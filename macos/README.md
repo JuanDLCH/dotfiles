@@ -1,6 +1,6 @@
 # macOS (work laptop)
 
-MacBook Pro 14" (Apple Silicon), company-managed (Kandji MDM), Latin American keyboard, two
+MacBook Pro 14" (Apple Silicon), company-managed (MDM), Latin American keyboard, two
 external 1080p monitors above the laptop. The goal is the Hyprland workflow from the rest of this
 repo without weakening the machine: **SIP stays on, nothing touches MDM, no drivers, no root
 daemons, and every install is checked first** (official Homebrew when possible).
@@ -16,6 +16,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
+| `fastfetch/config.jsonc` | `~/.config/fastfetch/config.jsonc` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
 
 ## What's installed
 
@@ -27,6 +28,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | [Rift](https://github.com/acsandmann/rift) | `acsandmann/tap/rift` | Accessibility | tiling WM |
 | skhd | `asmvik/formulae/skhd` | Accessibility, Screen Recording | app shortcuts, screenshots, mouse buttons |
 | gh | Homebrew core | none | GitHub CLI |
+| fastfetch | Homebrew core | none | system info + image when Kitty opens |
 | NordPass | cask `nordpass` | none | passwords |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
@@ -117,16 +119,17 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 ## Restore
 
 ```bash
-brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh
+brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch
 brew install --cask font-jetbrains-mono-nerd-font nordpass
 brew install acsandmann/tap/rift asmvik/formulae/skhd
 
 d=~/dotfiles/macos   # this folder
-mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty
+mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty ~/.config/fastfetch
 cp $d/rift/config.toml ~/.config/rift/
 cp $d/skhd/skhdrc ~/.skhdrc && cp $d/skhd/*.sh ~/.config/skhd/ && chmod +x ~/.config/skhd/*.sh
 cp $d/kitty/*.conf ~/.config/kitty/
 cp $d/starship.toml ~/.config/ && cp $d/zshrc ~/.zshrc
+cp $d/fastfetch/config.jsonc ~/.config/fastfetch/   # plus your own logo.png
 
 rift service install && rift service start   # then allow rift in Accessibility, `rift service restart`
 skhd --start-service                         # allow skhd in Accessibility and Screen Recording

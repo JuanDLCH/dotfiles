@@ -38,3 +38,6 @@ alias reload='source ~/.zshrc'
 # ---------- Plugins (deben ir al final) ----------
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# ---------- Bienvenida (solo en Kitty) ----------
+[[ $TERM == xterm-kitty && -o interactive ]] && fastfetch
