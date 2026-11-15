@@ -108,8 +108,11 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   manager can't focus without raising. Open floating apps on an empty workspace.
 - **Rift raises windows over the screenshot picker** highlight; that is why Opt+Shift+S goes
   through `screenshot-area.sh` instead of the native shortcut.
-- **Master-stack is not dwindle**: tried it to avoid a 3-rows-high column, but a 4th window
-  stacks instead of splitting beside. Back to BSP; if a column ends up stacked, Opt+Shift+J on it.
+- **Rift's BSP isn't quite dwindle**: a split keeps its orientation when a window closes, so
+  closing the left window left two windows stacked full-width (rows). `fit-min-size.sh` also
+  re-orients every split by its shape (wider than tall → side by side, else stacked) on each
+  `windows_changed`, which is what Hyprland's dwindle does. Master-stack was tried and isn't
+  dwindle (a 4th window stacks instead of splitting beside).
 - **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall, more with
   its library expanded): a window that won't shrink spills off the display or over its neighbour.
   `fit-min-size.sh` runs on Rift's `windows_changed` event (`run_on_start`) and on Opt+Shift+0: it

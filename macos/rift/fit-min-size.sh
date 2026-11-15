@@ -50,6 +50,41 @@ for u in $($R query displays | $J -r '.[].uuid'); do
 done
 
 paused=0
+pause() {
+  [ $paused = 1 ] && return
+  # Pausar "foco sigue al mouse" (si no, el foco vuelve a la ventana bajo el cursor) y
+  # "mouse sigue al foco" (para que el cursor no salte) mientras se ajusta.
+  $R execute config set-focus-follows-mouse false >/dev/null 2>&1
+  $R execute config set-mouse-follows-focus false >/dev/null 2>&1
+  paused=1
+}
+
+# ---------- Dwindle: cada división sigue la forma de su espacio ----------
+# Ancho ≥ alto → lado a lado; más alto que ancho → arriba/abajo. Así, al cerrar una ventana
+# la que queda no se queda en "filas" (p. ej. cerrar la izquierda deja 2 apiladas a lo ancho).
+# Imprime el id JSON de una ventana hija directa de la primera división mal orientada.
+misoriented() {
+  $R query layout --display "$1" 2>/dev/null | $J -c '
+    [ .container_tree | recurse(.children[]?)
+      | select(.node_type == "container" and (.children | length) >= 2)
+      | (if .frame.size.width >= .frame.size.height then "horizontal" else "vertical" end) as $want
+      | select(.layout_kind == "horizontal" or .layout_kind == "vertical")
+      | select(.layout_kind != $want)
+      | [ .children[] | select(.node_type == "window") | .window_id ] | first // empty
+    ] | first // empty'
+}
+for uuid in $($R query displays | $J -r '.[].uuid'); do
+  for step in 1 2 3 4 5 6; do
+    win=$(misoriented "$uuid")
+    [ -z "$win" ] && break
+    pause
+    $R execute window focus --window-id "$win" >/dev/null 2>&1
+    $R execute layout toggle-orientation >/dev/null 2>&1
+    sleep 0.4
+  done
+done
+
+# ---------- Tamaños mínimos ----------
 for uuid in $($R query displays | $J -r '.[].uuid'); do
   last_key=""; last_px=0; steps=0
   while [ $steps -lt $MAX_STEPS ]; do
@@ -59,12 +94,7 @@ for uuid in $($R query displays | $J -r '.[].uuid'); do
     # El mismo problema no mejoró con el paso anterior → no caben juntas: dejarlo así.
     [ "$win $axis" = "$last_key" ] && [ "$px" -ge "$last_px" ] && break
     last_key="$win $axis"; last_px=$px
-    if [ $paused = 0 ]; then
-      # Pausar "foco sigue al mouse" (si no, el foco vuelve a la ventana bajo el cursor) y
-      # "mouse sigue al foco" (para que el cursor no salte) mientras se ajusta.
-      $R execute config set-focus-follows-mouse false >/dev/null 2>&1
-      $R execute config set-mouse-follows-focus false >/dev/null 2>&1; paused=1
-    fi
+    pause
     $R execute window focus --window-id "$win" >/dev/null 2>&1
     $R execute window resize-grow --orientation "$axis" >/dev/null 2>&1
     steps=$((steps + 1))
