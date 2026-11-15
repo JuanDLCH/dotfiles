@@ -38,8 +38,7 @@ Music in the menu bar is native: System Settings → Menu Bar → Now Playing �
 
 ## Window manager: Rift
 
-Master-stack tiling (one window: full; two: halves; three or more: left half + a column on the
-right, i.e. dwindle limited to two columns), 10 px gaps, animations, focus follows mouse and the mouse follows
+BSP (dwindle-like) tiling, 10 px gaps, animations, focus follows mouse and the mouse follows
 keyboard focus (centred on the window, then hidden until it moves), 4 workspaces **per
 display**, layout preview in the menu bar, 3-finger swipe between workspaces. Settings, Calculator,
 Activity Monitor, Archive Utility and Finder dialogs float.
@@ -108,10 +107,8 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   manager can't focus without raising. Open floating apps on an empty workspace.
 - **Rift raises windows over the screenshot picker** highlight; that is why Opt+Shift+S goes
   through `screenshot-area.sh` instead of the native shortcut.
-- **Rift's BSP doesn't pick the split by shape** (unlike Hyprland's dwindle): a window moved onto
-  a display with two stacked windows got stacked too, three rows high. Master-stack with
-  `new_window_placement = "stack"` always gives left half + right column, which is the only
-  arrangement I use.
+- **Master-stack is not dwindle**: tried it to avoid a 3-rows-high column, but a 4th window
+  stacks instead of splitting beside. Back to BSP; if a column ends up stacked, Opt+Shift+J on it.
 - **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall): Rift doesn't
   respect them, so a window spilled off the display or over its neighbour. `fit-min-size.sh` runs on
   Rift's `windows_changed` event (`run_on_start`) and moves the left/right split just enough; in the
