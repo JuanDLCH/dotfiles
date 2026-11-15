@@ -14,6 +14,9 @@ alt - j    : open -a "Spotify"
 alt - 0x2B : open -a "System Settings"                      # Option + ,
 
 
+# ===== Sistema =====
+alt + shift - l : /usr/bin/pmset sleepnow                    # dormir el Mac
+
 # ===== Captura =====
 alt - s    : ~/.config/skhd/screenshot.sh                   # monitor bajo el mouse → portapapeles
 alt + shift - s : ~/.config/skhd/screenshot-area.sh         # área / Espacio = ventana → portapapeles (pausa el foco de Rift)

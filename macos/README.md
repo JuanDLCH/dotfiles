@@ -72,6 +72,7 @@ Opt = Option (⌥). On the Latin American layout **Opt+Q types `@`**, so it is n
 | Opt+T | new Kitty window (`open -na … --single-instance`, see gotchas) |
 | Opt+B / E / V / C / J | Safari / Finder (new window) / VS Code / Claude / Spotify |
 | Opt+, | System Settings |
+| Opt+Shift+L | sleep (`pmset sleepnow`; Ctrl+Cmd+Q only locks) |
 | Opt+S | screenshot of the display under the mouse → clipboard |
 | Opt+Shift+S | area screenshot (Space = pick a window) → clipboard; pauses Rift's focus-follows-mouse while picking |
 
