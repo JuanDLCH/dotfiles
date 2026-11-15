@@ -109,6 +109,8 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   privacy permissions *as skhd* (Kitty asked for Downloads as "skhd"). Launch apps with `open`.
 - **Floating windows hide behind tiled ones** with focus-follows-mouse, because without SIP a window
   manager can't focus without raising. Open floating apps on an empty workspace.
+- **JankyBorders with `order=above` is itself a window on top**, so picking a window (Space) in a
+  screenshot captured the empty border. `screenshot-area.sh` sends it below while picking.
 - **Rift raises windows over the screenshot picker** highlight; that is why Opt+Shift+S goes
   through `screenshot-area.sh` instead of the native shortcut.
 - **Rift's BSP isn't quite dwindle**: a split keeps its orientation when a window closes, so
