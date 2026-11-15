@@ -31,7 +31,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | gh | Homebrew core | none | GitHub CLI |
 | fastfetch | Homebrew core | none | system info + image when Kitty opens |
 | btop | Homebrew core | none | resource monitor (CPU, memory, disks, network, processes) |
-| [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | orange border on the focused window |
+| [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
