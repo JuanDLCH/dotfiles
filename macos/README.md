@@ -52,7 +52,7 @@ Activity Monitor, Archive Utility and Finder dialogs float.
 | Opt+1–4 / Opt+Shift+1–4 | go to workspace / send window to workspace (per display) |
 | Opt+Tab | last workspace |
 | Opt+F / Opt+Shift+F | maximize within gaps / without gaps |
-| Opt+Shift+Space | float ↔ tile |
+| Opt+A / Opt+Shift+Space | float ↔ tile (Opt+A as Super+A on Hyprland) |
 | Opt+Shift+J | toggle split orientation |
 | Opt+Shift+0 | balance sizes, then re-fit to minimum widths |
 | Opt+Shift+. / Opt+Shift+, | grow / shrink (`=`/`-` are elsewhere on the Latin American layout) |

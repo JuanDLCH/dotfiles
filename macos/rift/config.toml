@@ -470,6 +470,7 @@ comb1 = "Alt + Shift"
 # Ventana activa
 "Alt + F"             = "toggle_fullscreen_within_gaps"   # maximizar ↔ restaurar
 "Alt + Shift + F"     = "toggle_fullscreen"               # sin márgenes
+"Alt + A" = "toggle_window_floating"                 # como Super+A en Hyprland
 "Alt + Shift + Space" = "toggle_window_floating"
 "Alt + Shift + J"     = "toggle_orientation"              # lado a lado ↔ arriba/abajo
 "Alt + Shift + 0"     = { exec = ["/bin/sh", "-c", "/opt/homebrew/bin/rift-cli execute layout balance; /Users/juandy/.config/rift/fit-min-size.sh"] }   # emparejar y respetar tamaños mínimos
