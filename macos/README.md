@@ -107,6 +107,9 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 - **1080p externals look soft** on macOS (no font hinting, ~81–92 ppi). Nothing to tune in
   software; `AppleFontSmoothing 0` made no visible difference. The fix is a 4K 27" panel.
 - Kitty: `macos_option_as_alt no`, otherwise Opt+Q can't type `@` in the terminal.
+- **fastfetch on a new Kitty window** must wait until Rift finishes resizing it, or the image
+  is drawn at the old size (squashed, text scrolled). `zshrc` waits until `stty size` is stable.
+  `~/.hushlogin` hides the "Last login" line.
 
 ### Tried and dropped
 
@@ -128,7 +131,7 @@ mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty ~/.config/fastfetch
 cp $d/rift/config.toml ~/.config/rift/
 cp $d/skhd/skhdrc ~/.skhdrc && cp $d/skhd/*.sh ~/.config/skhd/ && chmod +x ~/.config/skhd/*.sh
 cp $d/kitty/*.conf ~/.config/kitty/
-cp $d/starship.toml ~/.config/ && cp $d/zshrc ~/.zshrc
+cp $d/starship.toml ~/.config/ && cp $d/zshrc ~/.zshrc && touch ~/.hushlogin
 cp $d/fastfetch/config.jsonc ~/.config/fastfetch/   # plus your own logo.png
 
 rift service install && rift service start   # then allow rift in Accessibility, `rift service restart`
