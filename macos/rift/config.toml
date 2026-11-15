@@ -84,7 +84,7 @@ hot_reload = true
 # This is the default layout mode if there is nothing else configured
 # in the `workspace_rules` section below.
 # You can set different layouts per workspace using `workspace_rules`.
-mode = "bsp"   # tipo dwindle
+mode = "master_stack"   # 1 ventana: completa · 2: mitades · 3+: izquierda + columna derecha (como dwindle a 2 columnas)
 
 # Where new windows are inserted by default for every layout:
 # - "next_to_selection": immediately after the selected window
@@ -101,13 +101,13 @@ equalize_nodes = true
 # these settings only apply when layout mode == "master_stack"
 [settings.layout.master_stack]
 # Fraction of space reserved for the master area (0.05..0.95)
-master_ratio = 0.6
+master_ratio = 0.5
 # Number of windows kept in the master area (>= 1)
 master_count = 1
 # Which side the master area occupies (left | right | top | bottom)
 master_side = "left"
 # Where new windows go when the master area is already full (master | stack | focused)
-new_window_placement = "master"
+new_window_placement = "stack"   # las nuevas van a la columna derecha
 # Orientation arrangement for the master area (horizontal | vertical)
 # If omitted, defaults to the direction perpendicular to master_side's split
 # master_arrangement = "vertical"

@@ -38,7 +38,8 @@ Music in the menu bar is native: System Settings → Menu Bar → Now Playing �
 
 ## Window manager: Rift
 
-BSP (dwindle-like) tiling, 10 px gaps, animations, focus follows mouse and the mouse follows
+Master-stack tiling (one window: full; two: halves; three or more: left half + a column on the
+right, i.e. dwindle limited to two columns), 10 px gaps, animations, focus follows mouse and the mouse follows
 keyboard focus (centred on the window, then hidden until it moves), 4 workspaces **per
 display**, layout preview in the menu bar, 3-finger swipe between workspaces. Settings, Calculator,
 Activity Monitor, Archive Utility and Finder dialogs float.
@@ -107,8 +108,10 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   manager can't focus without raising. Open floating apps on an empty workspace.
 - **Rift raises windows over the screenshot picker** highlight; that is why Opt+Shift+S goes
   through `screenshot-area.sh` instead of the native shortcut.
-- **Rift BSP doesn't pick the split by shape**: a window moved onto a display with two stacked
-  windows gets stacked too (a 3-high column). Fix with Opt+Shift+J on it, then Opt+Shift+0.
+- **Rift's BSP doesn't pick the split by shape** (unlike Hyprland's dwindle): a window moved onto
+  a display with two stacked windows got stacked too, three rows high. Master-stack with
+  `new_window_placement = "stack"` always gives left half + right column, which is the only
+  arrangement I use.
 - **Minimum window sizes** (Claude ~600 px wide, Spotify ~600 px tall) make windows overlap in
   small tiles on the 1512 px laptop screen. Keep two windows per display there.
 - **1080p externals look soft** on macOS (no font hinting, ~81–92 ppi). Nothing to tune in
