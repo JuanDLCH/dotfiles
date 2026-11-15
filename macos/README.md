@@ -53,6 +53,7 @@ Activity Monitor, Archive Utility and Finder dialogs float.
 | Opt+F / Opt+Shift+F | maximize within gaps / without gaps |
 | Opt+Shift+Space | float ↔ tile |
 | Opt+Shift+J | toggle split orientation |
+| Opt+Shift+0 | balance sizes |
 | Opt+Shift+= / Opt+Shift+- | grow / shrink |
 | Opt + drag | move a window (drop in the centre to swap) |
 | Opt+Z | pause Rift on the current space |
@@ -106,6 +107,8 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   manager can't focus without raising. Open floating apps on an empty workspace.
 - **Rift raises windows over the screenshot picker** highlight; that is why Opt+Shift+S goes
   through `screenshot-area.sh` instead of the native shortcut.
+- **Rift BSP doesn't pick the split by shape**: a window moved onto a display with two stacked
+  windows gets stacked too (a 3-high column). Fix with Opt+Shift+J on it, then Opt+Shift+0.
 - **Minimum window sizes** (Claude ~600 px wide, Spotify ~600 px tall) make windows overlap in
   small tiles on the 1512 px laptop screen. Keep two windows per display there.
 - **1080p externals look soft** on macOS (no font hinting, ~81–92 ppi). Nothing to tune in
