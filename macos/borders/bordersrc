@@ -4,7 +4,7 @@
 #   inactive = transparente (sin borde)
 options=(
   style=round
-  width=5.0
+  width=3.0
   hidpi=on
   order=above
   active_color=0xffbb9af7
