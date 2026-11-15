@@ -58,3 +58,42 @@ for pass in 1 2 3; do
   [ "$changed" = 0 ] && break
   sleep 0.45
 done
+
+# ---------- Columna derecha: alto mínimo (p. ej. WhatsApp sobre Kitty) ----------
+# Si una ventana de la columna no se deja achicar en alto y se mete en la de abajo (o se sale
+# por abajo), se le da más alto a ella con resize-grow vertical, que achica a su vecina.
+vertical_culprit() {  # $1 = uuid → imprime el id JSON de la ventana a agrandar, o nada
+  disp=$($R query displays | $J -c --arg u "$1" '.[] | select(.uuid == $u) | .frame')
+  $R query workspaces --display "$1" | $J -c --argjson d "$disp" --argjson g "$GAP" '
+    [ .[] | select(.is_active and .layout_mode == "master_stack" and .window_count >= 3) ][0]
+    | if . == null then empty else
+      ([ .windows[] | .frame.origin.x ] | min) as $mx
+      | [ .windows[] | select(.frame.origin.x > $mx + 5) ] | sort_by(.frame.origin.y) as $s
+      | ( [ range(0; ($s | length) - 1) as $i
+            | select($s[$i].frame.origin.y + $s[$i].frame.size.height + $g - $s[$i+1].frame.origin.y > 2)
+            | $s[$i].id ]
+          + [ $s[-1] | select(.frame.origin.y + .frame.size.height + $g - ($d.origin.y + $d.size.height) > 2) | .id ]
+        ) | first // empty
+      end'
+}
+
+orig_win=$(for u in $($R query displays | $J -r '.[].uuid'); do
+  $R query workspaces --display "$u" | $J -c '.[] | select(.is_active) | .windows[] | select(.is_focused) | .id'
+done | head -1)
+moved=0
+for uuid in $($R query displays | $J -r '.[].uuid'); do
+  for step in 1 2 3 4 5 6 7 8; do
+    win=$(vertical_culprit "$uuid")
+    [ -z "$win" ] && break
+    if [ "$moved" = 0 ]; then
+      $R execute config set-mouse-follows-focus false >/dev/null 2>&1; moved=1
+    fi
+    $R execute window focus --window-id "$win" >/dev/null 2>&1
+    $R execute window resize-grow --orientation vertical >/dev/null 2>&1
+    sleep 0.4
+  done
+done
+if [ "$moved" = 1 ]; then
+  [ -n "$orig_win" ] && $R execute window focus --window-id "$orig_win" >/dev/null 2>&1
+  $R execute config set-mouse-follows-focus true >/dev/null 2>&1
+fi

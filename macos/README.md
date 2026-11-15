@@ -114,8 +114,9 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   arrangement I use.
 - **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall): Rift doesn't
   respect them, so a window spilled off the display or over its neighbour. `fit-min-size.sh` runs on
-  Rift's `windows_changed` event (`run_on_start`) and moves the left/right split just enough. If both
-  sides have minimums that don't fit, it leaves them alone.
+  Rift's `windows_changed` event (`run_on_start`) and moves the left/right split just enough; in the
+  right column it grows the window that won't shrink in height (focusing it briefly, with
+  mouse-follows-focus paused). If two minimums can't fit together, it stops instead of flip-flopping.
 - **1080p externals look soft** on macOS (no font hinting, ~81–92 ppi). Nothing to tune in
   software; `AppleFontSmoothing 0` made no visible difference. The fix is a 4K 27" panel.
 - Kitty: `macos_option_as_alt no`, otherwise Opt+Q can't type `@` in the terminal.
