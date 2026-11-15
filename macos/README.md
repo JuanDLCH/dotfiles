@@ -100,6 +100,8 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   "Copy picture of the screen to the clipboard" = Opt+S (both shadowed by skhd, kept as fallback).
 - Privacy & Security: Accessibility → rift, skhd; Screen & System Audio Recording → skhd.
 - Desktop & Dock: Displays have separate Spaces = on (Rift needs it).
+- Keyboard → Text Input: Latin American + U.S. (for the external SK75), switched with Ctrl+Space
+  (Keyboard Shortcuts → Input Sources, off by default here); the input menu shows the active one.
 
 ## Gotchas (all hit in practice)
 
