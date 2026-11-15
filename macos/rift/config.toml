@@ -65,7 +65,10 @@ auto_focus_blacklist = []
 #   "rift-cli subscribe cli --event windows_changed --command sh --args -c --args 'sketchybar --trigger rift_windows_changed RIFT_WORKSPACE_NAME=\"$RIFT_WORKSPACE_NAME\" RIFT_WINDOW_COUNT=\"$RIFT_WINDOW_COUNT\"'"
 # ]
 
-run_on_start = []
+# Ajustar la división cuando una app no se deja achicar (ver fit-min-size.sh)
+run_on_start = [
+  "/opt/homebrew/bin/rift-cli subscribe cli --event windows_changed --command /bin/sh --args -c --args '/Users/juandy/.config/rift/fit-min-size.sh >/dev/null 2>&1 &'",
+]
 
 # Hot Reloading
 # - If true, rift will watch the config file for changes and reload automatically.

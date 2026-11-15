@@ -10,7 +10,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 
 | File here | Lives at |
 |---|---|
-| `rift/config.toml` | `~/.config/rift/config.toml` |
+| `rift/config.toml`, `rift/fit-min-size.sh` | `~/.config/rift/` |
 | `skhd/skhdrc` | `~/.skhdrc` |
 | `skhd/screenshot.sh`, `skhd/screenshot-area.sh` | `~/.config/skhd/` |
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
@@ -112,8 +112,10 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   a display with two stacked windows got stacked too, three rows high. Master-stack with
   `new_window_placement = "stack"` always gives left half + right column, which is the only
   arrangement I use.
-- **Minimum window sizes** (Claude ~600 px wide, Spotify ~600 px tall) make windows overlap in
-  small tiles on the 1512 px laptop screen. Keep two windows per display there.
+- **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall): Rift doesn't
+  respect them, so a window spilled off the display or over its neighbour. `fit-min-size.sh` runs on
+  Rift's `windows_changed` event (`run_on_start`) and moves the left/right split just enough. If both
+  sides have minimums that don't fit, it leaves them alone.
 - **1080p externals look soft** on macOS (no font hinting, ~81–92 ppi). Nothing to tune in
   software; `AppleFontSmoothing 0` made no visible difference. The fix is a 4K 27" panel.
 - Kitty: `macos_option_as_alt no`, otherwise Opt+Q can't type `@` in the terminal.
@@ -141,7 +143,7 @@ brew install acsandmann/tap/rift asmvik/formulae/skhd FelixKratz/formulae/border
 
 d=~/dotfiles/macos   # this folder
 mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty ~/.config/fastfetch ~/.config/borders
-cp $d/rift/config.toml ~/.config/rift/
+cp $d/rift/* ~/.config/rift/ && chmod +x ~/.config/rift/fit-min-size.sh
 cp $d/skhd/skhdrc ~/.skhdrc && cp $d/skhd/*.sh ~/.config/skhd/ && chmod +x ~/.config/skhd/*.sh
 cp $d/kitty/*.conf ~/.config/kitty/
 cp $d/starship.toml ~/.config/ && cp $d/zshrc ~/.zshrc && touch ~/.hushlogin
