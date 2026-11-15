@@ -16,7 +16,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
-| `fastfetch/config.jsonc` | `~/.config/fastfetch/config.jsonc` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
+| `fastfetch/config.jsonc`, `fastfetch/memory.sh` | `~/.config/fastfetch/` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
 
 ## What's installed
 
@@ -132,7 +132,7 @@ cp $d/rift/config.toml ~/.config/rift/
 cp $d/skhd/skhdrc ~/.skhdrc && cp $d/skhd/*.sh ~/.config/skhd/ && chmod +x ~/.config/skhd/*.sh
 cp $d/kitty/*.conf ~/.config/kitty/
 cp $d/starship.toml ~/.config/ && cp $d/zshrc ~/.zshrc && touch ~/.hushlogin
-cp $d/fastfetch/config.jsonc ~/.config/fastfetch/   # plus your own logo.png
+cp $d/fastfetch/* ~/.config/fastfetch/   # plus your own logo.png
 
 rift service install && rift service start   # then allow rift in Accessibility, `rift service restart`
 skhd --start-service                         # allow skhd in Accessibility and Screen Recording

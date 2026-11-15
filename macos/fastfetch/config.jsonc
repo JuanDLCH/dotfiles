@@ -27,7 +27,7 @@
     "break",
     { "type": "cpu",      "key": " CPU" },
     { "type": "gpu",      "key": "󰢮 GPU" },
-    { "type": "memory",   "key": " Memory" },
+    { "type": "command",  "key": " Memory", "text": "~/.config/fastfetch/memory.sh" },   // presión real, no la caché
     { "type": "disk",     "key": "󰋊 Disk" },
     { "type": "battery",  "key": "󰁹 Battery" },
     "break",
