@@ -4,8 +4,8 @@
   "logo": {
     "type": "kitty-direct",          // Kitty dibuja la imagen real (PNG)
     "source": "~/.config/fastfetch/logo.png",
-    "width": 30,
-    "height": 22,
+    "width": 34,
+    "height": 17,
     "padding": { "top": 1, "left": 2, "right": 3 }
   },
   "display": {
