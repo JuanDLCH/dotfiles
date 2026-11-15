@@ -109,11 +109,12 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
   through `screenshot-area.sh` instead of the native shortcut.
 - **Master-stack is not dwindle**: tried it to avoid a 3-rows-high column, but a 4th window
   stacks instead of splitting beside. Back to BSP; if a column ends up stacked, Opt+Shift+J on it.
-- **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall): Rift doesn't
-  respect them, so a window spilled off the display or over its neighbour. `fit-min-size.sh` runs on
-  Rift's `windows_changed` event (`run_on_start`) and moves the left/right split just enough; in the
-  right column it grows the window that won't shrink in height (focusing it briefly, with
-  mouse-follows-focus paused). If two minimums can't fit together, it stops instead of flip-flopping.
+- **Minimum window sizes** (WhatsApp ~970 px wide, Claude ~600, Spotify ~600 px tall, more with
+  its library expanded): a window that won't shrink spills off the display or over its neighbour.
+  `fit-min-size.sh` runs on Rift's `windows_changed` event (`run_on_start`) and on Opt+Shift+0: it
+  finds the window that overflows and grows it with `resize-grow` on that axis (focus-follows-mouse
+  and mouse-follows-focus are paused meanwhile, so focus can be moved), which shrinks the neighbour.
+  If a problem doesn't improve after a step, the two minimums can't fit together and it stops.
 - **1080p externals look soft** on macOS (no font hinting, ~81–92 ppi). Nothing to tune in
   software; `AppleFontSmoothing 0` made no visible difference. The fix is a 4K 27" panel.
 - Kitty: `macos_option_as_alt no`, otherwise Opt+Q can't type `@` in the terminal.
