@@ -31,6 +31,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | gh | Homebrew core | none | GitHub CLI |
 | fastfetch | Homebrew core | none | system info + image when Kitty opens |
 | btop | Homebrew core | none | resource monitor (CPU, memory, disks, network, processes) |
+| The Unarchiver, unar | cask `the-unarchiver`, Homebrew core | none | RAR and other archives (GUI and `unar` / `lsar` CLI) |
 | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
 
@@ -140,8 +141,8 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 ## Restore
 
 ```bash
-brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch btop
-brew install --cask font-jetbrains-mono-nerd-font nordpass
+brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch btop unar
+brew install --cask font-jetbrains-mono-nerd-font nordpass the-unarchiver
 brew install acsandmann/tap/rift asmvik/formulae/skhd FelixKratz/formulae/borders
 
 d=~/dotfiles/macos   # this folder
