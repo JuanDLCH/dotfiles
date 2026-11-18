@@ -24,6 +24,14 @@ func log(_ m: @autoclosure () -> String) {
 
 struct W { let id: CGWindowID; let pid: pid_t; let r: CGRect }
 
+// Caché: ¿el pid es una app "normal"? (consultarlo en cada vuelta gastaba CPU)
+var regularCache: [pid_t: Bool] = [:]
+func isRegular(_ pid: pid_t) -> Bool {
+    if let r = regularCache[pid] { return r }
+    let r = NSRunningApplication(processIdentifier: pid)?.activationPolicy == .regular
+    regularCache[pid] = r; return r
+}
+
 func snapshot() -> [CGWindowID: W] {
     let info = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
     var out: [CGWindowID: W] = [:]
@@ -35,7 +43,7 @@ func snapshot() -> [CGWindowID: W] {
               let x = b["X"], let y = b["Y"], let wd = b["Width"], let ht = b["Height"],
               wd > 20, ht > 20,
               // solo apps normales: los bordes de JankyBorders también son ventanas de nivel 0
-              NSRunningApplication(processIdentifier: pid)?.activationPolicy == .regular else { continue }
+              isRegular(pid) else { continue }
         out[id] = W(id: id, pid: pid, r: CGRect(x: x, y: y, width: wd, height: ht))
     }
     return out
@@ -199,7 +207,7 @@ func place(_ w: W, _ r: CGRect) -> CGRect {
     return got
 }
 func isFloating(_ w: W) -> Bool {
-    floating.contains(NSRunningApplication(processIdentifier: w.pid)?.bundleIdentifier ?? "")
+    floating.contains(bundle(w.pid))
 }
 func visibleRect(at p: CGPoint) -> CGRect? {
     let mainH = NSScreen.screens[0].frame.height
@@ -462,6 +470,7 @@ func bundle(_ pid: pid_t) -> String {
     bundleCache[pid] = b; return b
 }
 var popupsPrimed = false
+var popupTurn = false
 
 func focusAndPoint(pid: pid_t, id: CGWindowID, rect: CGRect) {
     NSRunningApplication(processIdentifier: pid)?.activate()
@@ -492,7 +501,9 @@ func checkDialogs(_ snap: [CGWindowID: W]) {
             return
         }
     }
-    // 2. Avisos del sistema nuevos (cualquier nivel de ventana)
+    // 2. Avisos del sistema nuevos (cualquier nivel de ventana); cada 2ª vuelta basta
+    popupTurn.toggle()
+    if !popupTurn { return }
     let info = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []
     var current: Set<CGWindowID> = []
     var fresh: (pid_t, CGWindowID, CGRect)? = nil
@@ -576,7 +587,7 @@ func tick() {
     }
     guard dragging else {
         pollCount += 1
-        if pollCount % 5 == 0 { watch() }   // ~150 ms
+        if pollCount % 6 == 0 { watch() }   // ~240 ms
         return
     }
     if moving { return }
@@ -607,6 +618,11 @@ if !AXIsProcessTrustedWithOptions(opts) {
     FileHandle.standardError.write("EdgeSync necesita permiso de Accesibilidad\n".data(using: .utf8)!)
 }
 try? FileManager.default.removeItem(atPath: "/tmp/edgesync-autoraise-paused")
+NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main) { n in
+    if let app = n.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
+        regularCache[app.processIdentifier] = nil; bundleCache[app.processIdentifier] = nil
+    }
+}
 signalAutoRaise("-CONT")   // por si EdgeSync se cerró con AutoRaise en pausa
-Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { _ in tick() }
+Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { _ in tick() }
 RunLoop.main.run()
