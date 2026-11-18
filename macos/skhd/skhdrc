@@ -17,6 +17,7 @@ alt - 0x2B : open -a "System Settings"                      # Option + ,
 
 
 # ===== Ventanas =====
+alt - f    : ~/.local/bin/win-grid max                    # ampliar la ventana enfocada sobre las demás / devolverla
 alt - g    : ~/.local/bin/win-grid                        # repartir en partes iguales (1–4 ventanas del monitor del mouse)
 
 # ===== Sistema =====
