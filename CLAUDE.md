@@ -48,6 +48,10 @@ Wiring:
 
 ## Owner preferences (don't undo)
 
+- Code projects live in `~/Documents/$USER/projects` on every machine (work ones in
+  `~/Documents/<company>/projects`). Separate projects (e.g. EdgeSync) are cloned there, never kept
+  inside this repo; dotfiles only documents how to install them.
+
 - Suites stay minimal: what the owner actually uses. `desktop-apps` = kitty, Firefox, Chrome,
   ChatGPT, VLC. No PWAs/firefoxpwa, Spotify, OpenCode or Hermes; ask before adding apps.
 - Peripherals: Razer Basilisk V3 Pro + Mouse Dock Pro (OpenRazer/Polychromatic) and a SteelSeries
