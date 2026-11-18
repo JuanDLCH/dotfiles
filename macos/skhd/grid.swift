@@ -5,6 +5,12 @@
 import AppKit
 import ApplicationServices
 
+if FileManager.default.fileExists(atPath: "/tmp/edgesync.debug") {
+    let l = "\(Date()) win-grid ejecutado (ppid \(getppid()))\n"
+    if let h = FileHandle(forWritingAtPath: "/tmp/win-grid.log") { h.seekToEndOfFile(); h.write(l.data(using: .utf8)!) }
+    else { FileManager.default.createFile(atPath: "/tmp/win-grid.log", contents: l.data(using: .utf8)) }
+}
+
 @_silgen_name("_AXUIElementGetWindow")
 func _AXUIElementGetWindow(_ e: AXUIElement, _ id: UnsafeMutablePointer<CGWindowID>) -> AXError
 
@@ -41,7 +47,11 @@ for w in info {
           !floating.contains(app.bundleIdentifier ?? ""), !userFloating.contains(id) else { continue }
     wins.append(W(id: id, pid: pid, r: r))
 }
-if CommandLine.arguments.contains("-v") { for w in wins { print(w.id, w.pid, NSRunningApplication(processIdentifier: w.pid)?.localizedName ?? "?", w.r) } }
+// -v: solo listar (no mover nada)
+if CommandLine.arguments.contains("-v") {
+    for w in wins { print(w.id, w.pid, NSRunningApplication(processIdentifier: w.pid)?.localizedName ?? "?", w.r) }
+    exit(0)
+}
 guard (1...4).contains(wins.count) else { exit(0) }
 
 // Celdas

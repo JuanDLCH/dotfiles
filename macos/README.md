@@ -66,7 +66,11 @@ EdgeSync also does, only in reaction to the user:
 code signing only) when present, so the Accessibility grant survives rebuilds; with an ad-hoc signature
 macOS drops the grant on every rebuild. Native tiling is **off** (Desktop & Dock → Windows: the three
 tiling toggles): macOS kept snapped windows in their half/quarter and undid EdgeSync's changes, so
-EdgeSync snaps on drop itself (mouse at a side → half, corner → quarter, top → full).
+EdgeSync snaps on drop itself, by zone of the mouse (no need to reach the edge): left/right quarter of
+the width × top/middle/bottom third → quarter / full-height column / quarter; centre touching the top →
+full; elsewhere → floating. Dropping onto an occupied cell splits it in two along its long side (the
+new window takes the half under the mouse). Automatic re-layouts only include windows that look tiled
+(≥ 3 sides against a screen edge or another window), so stray windows aren't pulled in.
 Debug: `touch /tmp/edgesync.debug` logs to `/tmp/edgesync.log` and enables `/tmp/edgesync.cmd`
 (`set <id> x y w h`, `drag x1 y1 x2 y2`) to reproduce issues without the user.
 
@@ -74,7 +78,7 @@ Debug: `touch /tmp/edgesync.debug` logs to `/tmp/edgesync.log` and enables `/tmp
 |---|---|
 | drag a shared edge | both windows resize (EdgeSync) |
 | Opt+G | re-lay out the display under the mouse (1–4 tiled windows, `win-grid`) |
-| drop a window with the mouse at a side / corner / top | half / quarter / full (EdgeSync) |
+| drop a window in the side quarter of the screen (top/middle/bottom third) | quarter / column / quarter (EdgeSync) |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
 | Razer F13/F14, F15, F16 | Ctrl+←/→, Window → Fill, Cmd+W (via `osascript`/System Events) |
 

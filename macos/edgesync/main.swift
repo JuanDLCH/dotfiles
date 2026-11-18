@@ -264,8 +264,24 @@ func saveFloating() {
 
 // Reorganizar el monitor con la prioridad del usuario (igual que ⌥G):
 // 1 → pantalla, 2 → mitades, 3 → master izquierda + 2 filas a la derecha, 4 → 2×2.
+// ¿Está encajada? Cada lado cuenta si está pegado al borde del monitor o a otra ventana; con ≥ 3
+// lados así es parte del mosaico (una suelta flota en medio y no toca casi nada).
+func looksTiled(_ r: CGRect, _ vis: CGRect, _ others: [CGRect]) -> Bool {
+    let t: CGFloat = 24
+    func near(_ a: CGFloat, _ b: CGFloat) -> Bool { abs(a - b) <= t }
+    let vOv = others.filter { overlap(r.minY, r.maxY, $0.minY, $0.maxY) > 40 }
+    let hOv = others.filter { overlap(r.minX, r.maxX, $0.minX, $0.maxX) > 40 }
+    let left   = near(r.minX, vis.minX) || vOv.contains { near(r.minX, $0.maxX + gap) }
+    let right  = near(r.maxX, vis.maxX) || vOv.contains { near(r.maxX, $0.minX - gap) }
+    let top    = near(r.minY, vis.minY) || hOv.contains { near(r.minY, $0.maxY + gap) }
+    let bottom = near(r.maxY, vis.maxY) || hOv.contains { near(r.maxY, $0.minY - gap) }
+    return [left, right, top, bottom].filter { $0 }.count >= 3
+}
 func regrid(_ vis: CGRect) {
-    let ws = snapshot().values.filter { vis.contains(CGPoint(x: $0.r.midX, y: $0.r.midY)) && !isFloating($0) && !userFloating.contains($0.id) }
+    // Solo las encajadas: una ventana suelta que nunca estuvo en el mosaico no se mete a la fuerza
+    let cand = snapshot().values.filter { vis.contains(CGPoint(x: $0.r.midX, y: $0.r.midY)) && !isFloating($0) &&
+                                          !userFloating.contains($0.id) }
+    let ws = cand.filter { w in looksTiled(w.r, vis, cand.filter { $0.id != w.id }.map { $0.r }) }
         .sorted { $0.id < $1.id }
     guard (1...4).contains(ws.count) else { return }
     let v = vis.insetBy(dx: margin, dy: margin)
@@ -390,7 +406,29 @@ func settle(_ id: CGWindowID, old: CGRect? = nil) {
         if o.r.midY < T.midY { cands.append((with(o.r, .bottom, T.minY - gap), .bottom)) }
         else                 { cands.append((with(o.r, .top, T.maxY + gap), .top)) }
         let ok = cands.filter { $0.0.width >= 120 && $0.0.height >= 120 }
-        guard let best = ok.max(by: { $0.0.width * $0.0.height < $1.0.width * $1.0.height }) else { continue }
+        guard let best = ok.max(by: { $0.0.width * $0.0.height < $1.0.width * $1.0.height }) else {
+            // Soltada encima de otra que ocupa el mismo sitio: partir el sitio en dos (dwindle), por el
+            // lado largo; la nueva queda en la mitad donde está el mouse
+            let cell = T.union(o.r)
+            let mainH = NSScreen.screens[0].frame.height
+            let m = NSEvent.mouseLocation, mp = CGPoint(x: m.x, y: mainH - m.y)
+            var a = cell, b = cell
+            if cell.width >= cell.height {
+                let w = (cell.width - gap) / 2
+                a = CGRect(x: cell.minX, y: cell.minY, width: w, height: cell.height)
+                b = CGRect(x: cell.minX + w + gap, y: cell.minY, width: w, height: cell.height)
+                if mp.x > cell.midX { swap(&a, &b) }
+            } else {
+                let h = (cell.height - gap) / 2
+                a = CGRect(x: cell.minX, y: cell.minY, width: cell.width, height: h)
+                b = CGRect(x: cell.minX, y: cell.minY + h + gap, width: cell.width, height: h)
+                if mp.y > cell.midY { swap(&a, &b) }
+            }
+            T = a
+            let got = place(o, b); placed[o.id] = got
+            log("  partir sitio con \(o.id): puesta \(a), otra -> \(got)")
+            continue
+        }
         var got = place(o, best.0)
         // Por su tamaño mínimo se saldría de la pantalla: que se quede donde estaba
         if got.minX < vis.minX - tol || got.maxX > vis.maxX + tol || got.minY < vis.minY - tol || got.maxY > vis.maxY + tol {
@@ -694,9 +732,9 @@ func resolveAfterResize(_ t: W) {
 }
 
 // Encaje al soltar: la ventana que el usuario movió (la de la app activa cuya posición cambió) y
-// la celda según dónde está el mouse: borde izq/der → mitad, esquina → cuarto, arriba → completa.
+// la celda según la zona de la pantalla donde se suelta el mouse (ver abajo).
 let edgeZone: CGFloat = 12       // px desde el borde de la pantalla
-let cornerZone: CGFloat = 160    // px desde la esquina para contar como esquina
+let sideZone: CGFloat = 0.25     // fracción del ancho que cuenta como lado izquierdo/derecho
 func snapTarget() -> (W, CGRect)? {
     let front = NSWorkspace.shared.frontmostApplication?.processIdentifier
     let cur = snapshot()
@@ -709,24 +747,30 @@ func snapTarget() -> (W, CGRect)? {
     let m = NSEvent.mouseLocation
     let p = CGPoint(x: m.x, y: mainH - m.y)
     guard let scr = NSScreen.screens.first(where: { NSMouseInRect(m, $0.frame, false) }) else { return nil }
-    let full = CGRect(x: scr.frame.minX, y: mainH - scr.frame.maxY, width: scr.frame.width, height: scr.frame.height)
     let vis = CGRect(x: scr.visibleFrame.minX, y: mainH - scr.visibleFrame.maxY,
                      width: scr.visibleFrame.width, height: scr.visibleFrame.height)
-    let nearL = p.x - full.minX <= edgeZone, nearR = full.maxX - p.x <= edgeZone
-    let nearT = p.y - vis.minY <= edgeZone, nearB = full.maxY - p.y <= edgeZone
-    let inTopCorner = p.y - vis.minY <= cornerZone, inBottomCorner = full.maxY - p.y <= cornerZone
-    let inLeftCorner = p.x - full.minX <= cornerZone, inRightCorner = full.maxX - p.x <= cornerZone
     let v = vis.insetBy(dx: margin, dy: margin)
     let hw = (v.width - gap) / 2, hh = (v.height - gap) / 2
     let L = CGRect(x: v.minX, y: v.minY, width: hw, height: v.height)
     let R = CGRect(x: v.minX + hw + gap, y: v.minY, width: hw, height: v.height)
     let TL = CGRect(x: v.minX, y: v.minY, width: hw, height: hh), TR = CGRect(x: v.minX + hw + gap, y: v.minY, width: hw, height: hh)
     let BL = CGRect(x: v.minX, y: v.minY + hh + gap, width: hw, height: hh), BR = CGRect(x: v.minX + hw + gap, y: v.minY + hh + gap, width: hw, height: hh)
+    // Zonas amplias (no hace falta llegar al borde ni a la esquina):
+    //   cuarto izquierdo/derecho del ancho × tercio de arriba/medio/abajo → cuarto / columna / cuarto
+    //   centro pegado arriba → pantalla completa; resto del centro → flotante
+    let fx = (p.x - vis.minX) / vis.width, fy = (p.y - vis.minY) / vis.height
+    let side = fx < sideZone ? -1 : (fx > 1 - sideZone ? 1 : 0)
+    let row = fy < 1.0 / 3 ? -1 : (fy > 2.0 / 3 ? 1 : 0)
     var cell: CGRect? = nil
-    if nearL { cell = inTopCorner ? TL : inBottomCorner ? BL : L }
-    else if nearR { cell = inTopCorner ? TR : inBottomCorner ? BR : R }
-    else if nearT { cell = inLeftCorner ? TL : inRightCorner ? TR : v }
-    else if nearB { cell = inLeftCorner ? BL : inRightCorner ? BR : nil }
+    switch (side, row) {
+    case (-1, -1): cell = TL
+    case (-1, 0):  cell = L
+    case (-1, 1):  cell = BL
+    case (1, -1):  cell = TR
+    case (1, 0):   cell = R
+    case (1, 1):   cell = BR
+    default:       cell = p.y - vis.minY <= edgeZone ? v : nil
+    }
     guard let c = cell else { return nil }
     return (moved, c)
 }
