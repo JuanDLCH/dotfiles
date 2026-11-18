@@ -59,6 +59,7 @@ rebuilds.
 | drag a shared edge | both windows resize (EdgeSync) |
 | Opt+G | re-lay out the display under the mouse (1–4 tiled windows, `win-grid`) |
 | Opt+F | enlarge the focused window over the others / put it back (`win-grid max`) |
+| Ctrl+Opt + arrows | focus the nearest window in that direction, across displays (`win-grid focus`) |
 | ⌥ + drag a window (preview shows the cell), drop with ⌥ | snap: quarter / column / quarter / full (EdgeSync) |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
 | Razer F13/F14, F15, F16 | Ctrl+←/→, enlarge/back (`win-grid max`), Cmd+W (via `send-key`) |

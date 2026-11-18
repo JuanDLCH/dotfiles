@@ -18,6 +18,10 @@ alt - 0x2B : open -a "System Settings"                      # Option + ,
 
 # ===== Ventanas =====
 alt - f    : ~/.local/bin/win-grid max                    # ampliar la ventana enfocada sobre las demás / devolverla
+ctrl + alt - left  : ~/.local/bin/win-grid focus left     # foco a la ventana de la izquierda (cruza monitores)
+ctrl + alt - right : ~/.local/bin/win-grid focus right
+ctrl + alt - up    : ~/.local/bin/win-grid focus up
+ctrl + alt - down  : ~/.local/bin/win-grid focus down
 alt - g    : ~/.local/bin/win-grid                        # repartir en partes iguales (1–4 ventanas del monitor del mouse)
 
 # ===== Sistema =====
