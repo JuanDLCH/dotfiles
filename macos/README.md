@@ -12,13 +12,12 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 |---|---|
 | `rift/config.toml`, `rift/fit-min-size.sh` | `~/.config/rift/` |
 | `skhd/skhdrc` | `~/.skhdrc` |
-| `skhd/open-here.sh`, `skhd/screenshot.sh`, `skhd/screenshot-area.sh`, `skhd/grid.swift` | `~/.config/skhd/` (grid: `swiftc -O -o ~/.local/bin/win-grid grid.swift`) |
+| `skhd/open-here.sh`, `skhd/screenshot.sh`, `skhd/screenshot-area.sh` | `~/.config/skhd/` |
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
 | `borders/bordersrc` | `~/.config/borders/bordersrc` |
 | `autoraise/AutoRaise.conf`, `autoraise/local.autoraise.plist` | `~/.AutoRaise`, `~/Library/LaunchAgents/` |
-| `edgesync/main.swift`, `edgesync/build.sh`, `edgesync/local.edgesync.plist` | `~/Applications/EdgeSync.app` (built), `~/Library/LaunchAgents/` |
 | `fastfetch/config.jsonc`, `fastfetch/memory.sh` | `~/.config/fastfetch/` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
 
 ## What's installed
@@ -37,43 +36,23 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
 | [AutoRaise](https://github.com/sbmpost/AutoRaise) v5.7 | built from source (not in Homebrew), `~/Applications` | Accessibility | focus follows mouse |
-| EdgeSync | own code, `edgesync/` (~170 lines of Swift) | Accessibility | dragging a window edge resizes the windows touching it |
+| [EdgeSync](https://github.com/JuanDLCH/edgesync) + `win-grid` | own project, built from source | Accessibility | shared edges, snapping, layouts |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
 
-## Windows: native + AutoRaise (current)
+## Windows: EdgeSync + AutoRaise (current)
 
 Rift is **disabled, not removed** (since 2026-11-18): too many bugs from a young project plus the
-`fit-min-size.sh` patching. Windows are arranged by hand with macOS tiling and AutoRaise gives
-focus-follows-mouse (hold Ctrl to pause it). **EdgeSync** (`edgesync/`) makes neighbours follow
-a dragged edge: while the left button is down, the first window that changes *size* is the one being
-resized, and its edge is treated as a divider: windows on the same display aligned with it in the same
-column/row (e.g. the one stacked above) move that edge too, and the ones touching it from the other
-side (≤ 40 px apart) follow, keeping the gap. Screen-edge borders drag nothing.
+`fit-min-size.sh` patching. Windows are placed by hand; AutoRaise gives focus-follows-mouse (hold
+Ctrl to pause it) and **[EdgeSync](https://github.com/JuanDLCH/edgesync)** (own project, separate
+repo, includes `win-grid`) adds Hyprland-like behaviour: shared edges that move together, snapping
+by drop zone, making room on drop, floating windows, dwindle re-layout on close and ⌥G, and focus for
+floating windows and dialogs. See its README for details, settings and debugging.
 
-EdgeSync also does, only in reaction to the user:
-- **Drop**: a window placed touching ≥ 2 screen edges (native halves/quarters, ⌥-drag snapping) makes
-  overlapped windows cede on the axis where they lose least (waiting/retrying for slow apps such as
-  Electron; if one has a minimum size, the placed one adapts, never below 200 px), then small gaps
-  (≤ 250 px) are filled. Dropped anywhere else = **floating**: remembered per window
-  (`/tmp/edgesync-floating`), and the remaining tiled windows are re-laid out.
-- **Margins**: windows sit flush under the menu bar, 8 px from the sides and bottom, 10 px apart (the menu bar height is taken from the screen that reports it: macOS says the secondary display has none).
-- **Layout** (re-layout, close, ⌥G): 1 → full, 2 → halves, 3 → master left + 2 rows right, 4 → dwindle (left column, top-right, bottom-right split in two),
-  each window to the nearest cell. Closing a tiled window re-lays out its display.
-- **Focus**: while a floating window or a dialog has focus, AutoRaise is paused (SIGSTOP), so hovering
-  other windows doesn't cover it; new dialogs and system prompts get focus and the mouse.
-- Moves (⌥-drag, or both edges of an axis changing) never drag neighbours. Moving a window does nothing. It only polls the mouse button when idle.
-`edgesync/build.sh` signs it with a local self-signed certificate "EdgeSync Local" (login keychain,
-code signing only) when present, so the Accessibility grant survives rebuilds; with an ad-hoc signature
-macOS drops the grant on every rebuild. Native tiling is **off** (Desktop & Dock → Windows: the three
-tiling toggles): macOS kept snapped windows in their half/quarter and undid EdgeSync's changes, so
-EdgeSync snaps on drop itself, by zone of the mouse (no need to reach the edge): left/right quarter of
-the width × top/middle/bottom third → quarter / full-height column / quarter; centre touching the top →
-full; elsewhere → floating. Dropping onto an occupied cell splits it in two along its long side (the
-new window takes the half under the mouse). Automatic re-layouts only include windows that look tiled
-(≥ 3 sides against a screen edge or another window), so stray windows aren't pulled in.
-Debug: `touch /tmp/edgesync.debug` logs to `/tmp/edgesync.log` and enables `/tmp/edgesync.cmd`
-(`set <id> x y w h`, `drag x1 y1 x2 y2`) to reproduce issues without the user.
+Native tiling is **off** (Desktop & Dock → Windows: the three tiling toggles): macOS kept snapped
+windows in their half/quarter and undid EdgeSync's changes. EdgeSync is signed with a local
+self-signed certificate "EdgeSync Local" (its `make-cert.sh`) so the Accessibility grant survives
+rebuilds.
 
 | Keys | Action |
 |---|---|
@@ -222,8 +201,7 @@ cp $d/borders/bordersrc ~/.config/borders/ && chmod +x ~/.config/borders/borders
 brew services start felixkratz/formulae/borders
 cp $d/autoraise/AutoRaise.conf ~/.AutoRaise && cp $d/autoraise/local.autoraise.plist ~/Library/LaunchAgents/
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.autoraise.plist   # allow AutoRaise in Accessibility
-$d/edgesync/build.sh && cp $d/edgesync/local.edgesync.plist ~/Library/LaunchAgents/
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.edgesync.plist     # allow EdgeSync in Accessibility
+git clone https://github.com/JuanDLCH/edgesync ~/edgesync && ~/edgesync/make-cert.sh && ~/edgesync/install.sh   # allow EdgeSync in Accessibility
 ```
 
 After editing a live file, copy it back here so this folder stays current.
