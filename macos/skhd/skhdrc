@@ -29,9 +29,9 @@ alt + shift - s : ~/.config/skhd/screenshot-area.sh         # área / Espacio = 
 
 # ===== Mouse Razer Basilisk V3 Pro (F13–F18 en la memoria del mouse) =====
 # Mismo mapeo que en Hyprland (repo dotfiles, README → "Mouse").
-f13 : osascript -e 'tell application "System Events" to key code 123 using control down'                       # rueda ←: escritorio anterior (Ctrl+←)
-f14 : osascript -e 'tell application "System Events" to key code 124 using control down'                       # rueda →: escritorio siguiente (Ctrl+→)
-f15 : osascript -e 'tell application "System Events" to tell (first process whose frontmost is true) to click menu item "Fill" of menu "Window" of menu bar 1'   # Hypershift + clic izq: llenar pantalla (Window → Fill)
-f16 : osascript -e 'tell application "System Events" to key code 13 using command down'                        # Hypershift + clic der: cerrar ventana (Cmd+W)
+f13 : ~/.local/bin/send-key ctrl left                      # rueda ←: escritorio anterior (Ctrl+←)
+f14 : ~/.local/bin/send-key ctrl right                     # rueda →: escritorio siguiente (Ctrl+→)
+f15 : ~/.local/bin/win-grid max                            # Hypershift + clic izq: ampliar / devolver (como ⌥F)
+f16 : ~/.local/bin/send-key cmd w                          # Hypershift + clic der: cerrar ventana (Cmd+W)
 f17 : ~/.config/skhd/screenshot-area.sh                                     # lateral adelante: captura de área (como ⌥⇧S)
 f18 : open -a "Spotify"                                                      # lateral atrás: música

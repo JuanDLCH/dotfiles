@@ -61,7 +61,7 @@ rebuilds.
 | Opt+F | enlarge the focused window over the others / put it back (`win-grid max`) |
 | drop a window in the side quarter of the screen (top/middle/bottom third) | quarter / column / quarter (EdgeSync) |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
-| Razer F13/F14, F15, F16 | Ctrl+←/→, Window → Fill, Cmd+W (via `osascript`/System Events) |
+| Razer F13/F14, F15, F16 | Ctrl+←/→, enlarge/back (`win-grid max`), Cmd+W (via `send-key`) |
 
 Opt+A, Opt+Shift+0 and the other Rift keys below do nothing while Rift is off. App shortcuts use
 plain `open` (`open-here.sh` needs Rift).
