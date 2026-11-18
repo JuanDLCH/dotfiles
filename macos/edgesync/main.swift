@@ -55,56 +55,102 @@ func setFrame(_ a: AXUIElement, _ r: CGRect) {
 
 func overlap(_ a0: CGFloat, _ a1: CGFloat, _ b0: CGFloat, _ b1: CGFloat) -> CGFloat { min(a1, b1) - max(a0, b0) }
 
-// Vecinas pegadas a cada borde de `w` en la foto inicial
-struct Neighbours { var right: [W] = [], left: [W] = [], below: [W] = [], above: [W] = [] }
 // Monitor (coordenadas arriba-izquierda) que contiene un punto
 func screenRect(at p: CGPoint) -> CGRect? {
     let mainH = NSScreen.screens[0].frame.height
     return NSScreen.screens.map { CGRect(x: $0.frame.minX, y: mainH - $0.frame.maxY, width: $0.frame.width, height: $0.frame.height) }
         .first { $0.contains(p) }
 }
-func neighbours(of w: W, in all: [CGWindowID: W]) -> Neighbours {
-    var n = Neighbours()
-    let r = w.r
-    let scr = screenRect(at: CGPoint(x: r.midX, y: r.midY))
-    for o in all.values where o.id != w.id {
-        // solo ventanas del mismo monitor (la del monitor de al lado también queda "pegada")
-        if let scr = scr, !scr.contains(CGPoint(x: o.r.midX, y: o.r.midY)) { continue }
-        let q = o.r
-        let vOv = overlap(r.minY, r.maxY, q.minY, q.maxY) > 40
-        let hOv = overlap(r.minX, r.maxX, q.minX, q.maxX) > 40
-        if vOv, q.minX - r.maxX >= -tol, q.minX - r.maxX <= maxGap { n.right.append(o) }
-        if vOv, r.minX - q.maxX >= -tol, r.minX - q.maxX <= maxGap { n.left.append(o) }
-        if hOv, q.minY - r.maxY >= -tol, q.minY - r.maxY <= maxGap { n.below.append(o) }
-        if hOv, r.minY - q.maxY >= -tol, r.minY - q.maxY <= maxGap { n.above.append(o) }
+
+// ---------- Divisores ----------
+// Un borde arrastrado es un "divisor": lo comparten la ventana arrastrada y las alineadas con ella
+// en la misma columna/fila (mismo lado), y las del otro lado lo tocan. Al moverlo, todas siguen.
+// Ej.: Safari | (Claude arriba / Kitty abajo). Mover el borde izquierdo de Kitty mueve también el
+// de Claude y el derecho de Safari.
+enum Edge: CaseIterable { case left, right, top, bottom }
+let align: CGFloat = 14      // diferencia máxima para considerar dos bordes "alineados"
+
+func val(_ r: CGRect, _ e: Edge) -> CGFloat {
+    switch e { case .left: return r.minX; case .right: return r.maxX; case .top: return r.minY; case .bottom: return r.maxY }
+}
+func opposite(_ e: Edge) -> Edge {
+    switch e { case .left: return .right; case .right: return .left; case .top: return .bottom; case .bottom: return .top }
+}
+func vertical(_ e: Edge) -> Bool { e == .left || e == .right }   // divisor vertical (izq/der)
+// Solapamiento en el eje a lo largo del divisor
+func along(_ a: CGRect, _ b: CGRect, _ e: Edge) -> CGFloat {
+    vertical(e) ? overlap(a.minY, a.maxY, b.minY, b.maxY) : overlap(a.minX, a.maxX, b.minX, b.maxX)
+}
+// Separación entre dos ventanas apiladas a lo largo del divisor (Claude encima de Kitty)
+func stackGap(_ a: CGRect, _ b: CGRect, _ e: Edge) -> CGFloat {
+    vertical(e) ? max(b.minY - a.maxY, a.minY - b.maxY) : max(b.minX - a.maxX, a.minX - b.maxX)
+}
+// Nuevo rectángulo con el borde `e` en `v` (el borde opuesto queda fijo)
+func with(_ r: CGRect, _ e: Edge, _ v: CGFloat) -> CGRect {
+    switch e {
+    case .left:   return CGRect(x: v, y: r.minY, width: r.maxX - v, height: r.height)
+    case .right:  return CGRect(x: r.minX, y: r.minY, width: v - r.minX, height: r.height)
+    case .top:    return CGRect(x: r.minX, y: v, width: r.width, height: r.maxY - v)
+    case .bottom: return CGRect(x: r.minX, y: r.minY, width: r.width, height: v - r.minY)
     }
-    return n
+}
+
+struct Divider { var same: [W] = []; var opp: [W] = [] }   // same: sin la ventana arrastrada
+
+func divider(of t: W, _ e: Edge, in all: [W]) -> Divider {
+    let line = val(t.r, e)
+    // Mismo lado: cadena de ventanas con ese borde alineado, apiladas una tras otra
+    var group = [t]
+    var changed = true
+    while changed {
+        changed = false
+        for o in all where !group.contains(where: { $0.id == o.id }) {
+            guard abs(val(o.r, e) - line) <= align else { continue }
+            if group.contains(where: { let g = stackGap($0.r, o.r, e); return g >= -tol && g <= maxGap }) {
+                group.append(o); changed = true
+            }
+        }
+    }
+    // Otro lado: tocan la línea y se solapan con alguna del grupo
+    let oe = opposite(e)
+    let sign: CGFloat = (e == .right || e == .bottom) ? 1 : -1   // hacia dónde queda el otro lado
+    var d = Divider()
+    d.same = group.filter { $0.id != t.id }
+    for o in all where !group.contains(where: { $0.id == o.id }) {
+        let gap = (val(o.r, oe) - line) * sign
+        guard gap >= -tol, gap <= maxGap else { continue }
+        if group.contains(where: { along($0.r, o.r, e) > 40 }) { d.opp.append(o) }
+    }
+    // Sin nadie al otro lado es el borde de la pantalla, no un divisor: no arrastrar a las alineadas
+    if d.opp.isEmpty { d.same = [] }
+    return d
 }
 
 // Estado del arrastre
 var dragging = false
 var baseline: [CGWindowID: W] = [:]
 var target: W? = nil              // ventana que el usuario está redimensionando (foto inicial)
-var near = Neighbours()
+var dividers: [Edge: Divider] = [:]
 var lastApplied: CGRect? = nil
+
+func findDividers(_ t: W) {
+    let scr = screenRect(at: CGPoint(x: t.r.midX, y: t.r.midY))
+    // solo ventanas del mismo monitor (la del monitor de al lado también queda "pegada")
+    let all = baseline.values.filter { o in scr.map { $0.contains(CGPoint(x: o.r.midX, y: o.r.midY)) } ?? true }
+    dividers = [:]
+    for e in Edge.allCases { dividers[e] = divider(of: t, e, in: all) }
+}
 
 func apply(_ now: CGRect) {
     guard let t = target, now != lastApplied else { return }
     lastApplied = now
-    let b = t.r
-    let dR = now.maxX - b.maxX, dL = now.minX - b.minX, dB = now.maxY - b.maxY, dT = now.minY - b.minY
-    if abs(dR) > 0.5 { for n in near.right { if let a = axWindow(n) {
-        let gap = n.r.minX - b.maxX
-        setFrame(a, CGRect(x: now.maxX + gap, y: n.r.minY, width: n.r.maxX - now.maxX - gap, height: n.r.height)) } } }
-    if abs(dL) > 0.5 { for n in near.left { if let a = axWindow(n) {
-        let gap = b.minX - n.r.maxX
-        setFrame(a, CGRect(x: n.r.minX, y: n.r.minY, width: now.minX - gap - n.r.minX, height: n.r.height)) } } }
-    if abs(dB) > 0.5 { for n in near.below { if let a = axWindow(n) {
-        let gap = n.r.minY - b.maxY
-        setFrame(a, CGRect(x: n.r.minX, y: now.maxY + gap, width: n.r.width, height: n.r.maxY - now.maxY - gap)) } } }
-    if abs(dT) > 0.5 { for n in near.above { if let a = axWindow(n) {
-        let gap = b.minY - n.r.maxY
-        setFrame(a, CGRect(x: n.r.minX, y: n.r.minY, width: n.r.width, height: now.minY - gap - n.r.minY)) } } }
+    for e in Edge.allCases {
+        let delta = val(now, e) - val(t.r, e)
+        guard abs(delta) > 0.5, let d = dividers[e] else { continue }
+        for w in d.same { if let a = axWindow(w) { setFrame(a, with(w.r, e, val(w.r, e) + delta)) } }
+        let oe = opposite(e)
+        for w in d.opp { if let a = axWindow(w) { setFrame(a, with(w.r, oe, val(w.r, oe) + delta)) } }
+    }
 }
 
 func tick() {
@@ -127,8 +173,8 @@ func tick() {
         for (id, b) in baseline {
             guard let c = cur[id] else { continue }
             if abs(c.r.width - b.r.width) > 1 || abs(c.r.height - b.r.height) > 1 {
-                target = b; near = neighbours(of: b, in: baseline)
-                log("resize \(id) base=\(b.r) vecinas r\(near.right.count) l\(near.left.count) b\(near.below.count) a\(near.above.count)")
+                target = b; findDividers(b)
+                log("resize \(id) base=\(b.r) " + Edge.allCases.map { "\($0): mismo \(dividers[$0]!.same.count) otro \(dividers[$0]!.opp.count)" }.joined(separator: ", "))
                 break
             }
         }
