@@ -15,6 +15,7 @@ alt - j    : open -a "Spotify"
 alt - 0x2B : open -a "System Settings"                      # Option + ,
 
 
+
 # ===== Sistema =====
 alt - l         : /usr/bin/pmset sleepnow                    # dormir el Mac
 

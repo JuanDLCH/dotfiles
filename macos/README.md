@@ -18,6 +18,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | `zshrc` | `~/.zshrc` |
 | `borders/bordersrc` | `~/.config/borders/bordersrc` |
 | `autoraise/AutoRaise.conf`, `autoraise/local.autoraise.plist` | `~/.AutoRaise`, `~/Library/LaunchAgents/` |
+| `edgesync/main.swift`, `edgesync/build.sh`, `edgesync/local.edgesync.plist` | `~/Applications/EdgeSync.app` (built), `~/Library/LaunchAgents/` |
 | `fastfetch/config.jsonc`, `fastfetch/memory.sh` | `~/.config/fastfetch/` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
 
 ## What's installed
@@ -36,6 +37,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
 | [AutoRaise](https://github.com/sbmpost/AutoRaise) v5.7 | built from source (not in Homebrew), `~/Applications` | Accessibility | focus follows mouse |
+| EdgeSync | own code, `edgesync/` (~170 lines of Swift) | Accessibility | dragging a window edge resizes the windows touching it |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
 
@@ -43,10 +45,16 @@ Music in the menu bar is native: System Settings → Menu Bar → Now Playing �
 
 Rift is **disabled, not removed** (since 2026-11-18): too many bugs from a young project plus the
 `fit-min-size.sh` patching. Windows are arranged by hand with macOS tiling and AutoRaise gives
-focus-follows-mouse (hold Ctrl to pause it).
+focus-follows-mouse (hold Ctrl to pause it). **EdgeSync** (`edgesync/`) makes neighbours follow
+a dragged edge: while the left button is down, the first window that changes *size* is the one being
+resized, and every window on the same display touching that edge (≤ 40 px apart) moves its own edge
+along, keeping the gap. Moving a window does nothing. It only polls the mouse button when idle.
+Rebuilding it (`edgesync/build.sh`) changes its ad-hoc signature, so macOS drops the Accessibility
+grant: remove it with − and add it again.
 
 | Keys | Action |
 |---|---|
+| drag a shared edge | both windows resize (EdgeSync) |
 | Fn+Ctrl+F / arrows | fill / halves (Window → Move & Resize); Opt while dragging snaps without delay |
 | Fn+Ctrl+Shift + arrows | arrange two windows side by side, etc. |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
@@ -57,7 +65,7 @@ plain `open` (`open-here.sh` needs Rift).
 
 Back to Rift: `launchctl enable gui/$(id -u)/git.acsandmann.rift && rift service start`, restore
 `skhdrc` from git history (commit before this section), and
-`launchctl bootout gui/$(id -u)/local.autoraise`.
+`launchctl bootout gui/$(id -u)/local.autoraise` (and `local.edgesync`).
 
 ## Window manager: Rift (disabled)
 
@@ -191,6 +199,8 @@ cp $d/borders/bordersrc ~/.config/borders/ && chmod +x ~/.config/borders/borders
 brew services start felixkratz/formulae/borders
 cp $d/autoraise/AutoRaise.conf ~/.AutoRaise && cp $d/autoraise/local.autoraise.plist ~/Library/LaunchAgents/
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.autoraise.plist   # allow AutoRaise in Accessibility
+$d/edgesync/build.sh && cp $d/edgesync/local.edgesync.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.edgesync.plist     # allow EdgeSync in Accessibility
 ```
 
 After editing a live file, copy it back here so this folder stays current.
