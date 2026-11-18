@@ -16,6 +16,9 @@ alt - 0x2B : open -a "System Settings"                      # Option + ,
 
 
 
+# ===== Ventanas =====
+alt - g    : ~/.local/bin/win-grid                        # repartir en partes iguales (1–4 ventanas del monitor del mouse)
+
 # ===== Sistema =====
 alt - l         : /usr/bin/pmset sleepnow                    # dormir el Mac
 

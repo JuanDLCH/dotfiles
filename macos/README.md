@@ -12,7 +12,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 |---|---|
 | `rift/config.toml`, `rift/fit-min-size.sh` | `~/.config/rift/` |
 | `skhd/skhdrc` | `~/.skhdrc` |
-| `skhd/open-here.sh`, `skhd/screenshot.sh`, `skhd/screenshot-area.sh` | `~/.config/skhd/` |
+| `skhd/open-here.sh`, `skhd/screenshot.sh`, `skhd/screenshot-area.sh`, `skhd/grid.swift` | `~/.config/skhd/` (grid: `swiftc -O -o ~/.local/bin/win-grid grid.swift`) |
 | `kitty/kitty.conf`, `kitty/current-theme.conf` | `~/.config/kitty/` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
@@ -49,13 +49,26 @@ focus-follows-mouse (hold Ctrl to pause it). **EdgeSync** (`edgesync/`) makes ne
 a dragged edge: while the left button is down, the first window that changes *size* is the one being
 resized, and its edge is treated as a divider: windows on the same display aligned with it in the same
 column/row (e.g. the one stacked above) move that edge too, and the ones touching it from the other
-side (≤ 40 px apart) follow, keeping the gap. Screen-edge borders drag nothing. Moving a window does nothing. It only polls the mouse button when idle.
+side (≤ 40 px apart) follow, keeping the gap. Screen-edge borders drag nothing.
+
+EdgeSync also does, only in reaction to the user:
+- **Drop**: a window placed touching ≥ 2 screen edges (native halves/quarters, ⌥-drag snapping) makes
+  overlapped windows cede on the axis where they lose least (waiting/retrying for slow apps such as
+  Electron; if one has a minimum size, the placed one adapts, never below 200 px), then small gaps
+  (≤ 250 px) are filled. Dropped anywhere else = **floating**: remembered per window
+  (`/tmp/edgesync-floating`), and the remaining tiled windows are re-laid out.
+- **Layout** (re-layout, close, ⌥G): 1 → full, 2 → halves, 3 → master left + 2 rows right, 4 → 2×2,
+  each window to the nearest cell. Closing a tiled window re-lays out its display.
+- **Focus**: while a floating window or a dialog has focus, AutoRaise is paused (SIGSTOP), so hovering
+  other windows doesn't cover it; new dialogs and system prompts get focus and the mouse.
+- Moves (⌥-drag, or both edges of an axis changing) never drag neighbours. Moving a window does nothing. It only polls the mouse button when idle.
 Rebuilding it (`edgesync/build.sh`) changes its ad-hoc signature, so macOS drops the Accessibility
 grant: remove it with − and add it again.
 
 | Keys | Action |
 |---|---|
 | drag a shared edge | both windows resize (EdgeSync) |
+| Opt+G | re-lay out the display under the mouse (1–4 tiled windows, `win-grid`) |
 | Fn+Ctrl+F / arrows | fill / halves (Window → Move & Resize); Opt while dragging snaps without delay |
 | Fn+Ctrl+Shift + arrows | arrange two windows side by side, etc. |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
