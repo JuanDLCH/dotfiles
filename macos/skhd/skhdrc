@@ -5,14 +5,14 @@
 # Teclado Latin American: Option+Q escribe "@" → NUNCA usar "alt - q" aquí.
 
 # ===== Aplicaciones =====
-# open-here.sh = open, pero la ventana nueva aparece en el monitor del mouse.
-alt - t    : ~/.config/skhd/open-here.sh -na kitty --args --single-instance -d ~   # vía open: Kitty es dueño de sus permisos
-alt - b    : ~/.config/skhd/open-here.sh -a "Safari"
-alt - e    : ~/.config/skhd/open-here.sh ~
-alt - v    : ~/.config/skhd/open-here.sh -a "Visual Studio Code"
-alt - c    : ~/.config/skhd/open-here.sh -a "Claude"
-alt - j    : ~/.config/skhd/open-here.sh -a "Spotify"
-alt - 0x2B : ~/.config/skhd/open-here.sh -a "System Settings"                      # Option + ,
+# Sin Rift: apps con `open` normal (open-here.sh necesita Rift).
+alt - t    : open -na kitty --args --single-instance -d ~   # vía open: Kitty es dueño de sus permisos
+alt - b    : open -a "Safari"
+alt - e    : open ~
+alt - v    : open -a "Visual Studio Code"
+alt - c    : open -a "Claude"
+alt - j    : open -a "Spotify"
+alt - 0x2B : open -a "System Settings"                      # Option + ,
 
 
 # ===== Sistema =====
@@ -20,13 +20,13 @@ alt - l         : /usr/bin/pmset sleepnow                    # dormir el Mac
 
 # ===== Captura =====
 alt - s    : ~/.config/skhd/screenshot.sh                   # monitor bajo el mouse → portapapeles
-alt + shift - s : ~/.config/skhd/screenshot-area.sh         # área / Espacio = ventana → portapapeles (pausa el foco de Rift)
+alt + shift - s : ~/.config/skhd/screenshot-area.sh         # área / Espacio = ventana → portapapeles
 
 # ===== Mouse Razer Basilisk V3 Pro (F13–F18 en la memoria del mouse) =====
 # Mismo mapeo que en Hyprland (repo dotfiles, README → "Mouse").
-f13 : /opt/homebrew/bin/rift-cli execute workspace prev                      # rueda inclinada ←: escritorio anterior
-f14 : /opt/homebrew/bin/rift-cli execute workspace next                      # rueda inclinada →: escritorio siguiente
-f15 : /opt/homebrew/bin/rift-cli execute window toggle-fullscreen-within-gaps   # Hypershift + clic izq: maximizar
-f16 : /opt/homebrew/bin/rift-cli execute window close                        # Hypershift + clic der: cerrar ventana
+f13 : osascript -e 'tell application "System Events" to key code 123 using control down'                       # rueda ←: escritorio anterior (Ctrl+←)
+f14 : osascript -e 'tell application "System Events" to key code 124 using control down'                       # rueda →: escritorio siguiente (Ctrl+→)
+f15 : osascript -e 'tell application "System Events" to tell (first process whose frontmost is true) to click menu item "Fill" of menu "Window" of menu bar 1'   # Hypershift + clic izq: llenar pantalla (Window → Fill)
+f16 : osascript -e 'tell application "System Events" to key code 13 using command down'                        # Hypershift + clic der: cerrar ventana (Cmd+W)
 f17 : ~/.config/skhd/screenshot-area.sh                                     # lateral adelante: captura de área (como ⌥⇧S)
-f18 : ~/.config/skhd/open-here.sh -a "Spotify"                                                      # lateral atrás: música
+f18 : open -a "Spotify"                                                      # lateral atrás: música

@@ -17,6 +17,7 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | `starship.toml` | `~/.config/starship.toml` |
 | `zshrc` | `~/.zshrc` |
 | `borders/bordersrc` | `~/.config/borders/bordersrc` |
+| `autoraise/AutoRaise.conf`, `autoraise/local.autoraise.plist` | `~/.AutoRaise`, `~/Library/LaunchAgents/` |
 | `fastfetch/config.jsonc`, `fastfetch/memory.sh` | `~/.config/fastfetch/` (put any PNG at `~/.config/fastfetch/logo.png`; the image is not in the repo) |
 
 ## What's installed
@@ -34,10 +35,31 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | The Unarchiver, unar | cask `the-unarchiver`, Homebrew core | none | RAR and other archives (GUI and `unar` / `lsar` CLI) |
 | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
+| [AutoRaise](https://github.com/sbmpost/AutoRaise) v5.7 | built from source (not in Homebrew), `~/Applications` | Accessibility | focus follows mouse |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
 
-## Window manager: Rift
+## Windows: native + AutoRaise (current)
+
+Rift is **disabled, not removed** (since 2026-11-18): too many bugs from a young project plus the
+`fit-min-size.sh` patching. Windows are arranged by hand with macOS tiling and AutoRaise gives
+focus-follows-mouse (hold Ctrl to pause it).
+
+| Keys | Action |
+|---|---|
+| Fn+Ctrl+F / arrows | fill / halves (Window → Move & Resize); Opt while dragging snaps without delay |
+| Fn+Ctrl+Shift + arrows | arrange two windows side by side, etc. |
+| Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
+| Razer F13/F14, F15, F16 | Ctrl+←/→, Window → Fill, Cmd+W (via `osascript`/System Events) |
+
+Opt+A, Opt+Shift+0 and the other Rift keys below do nothing while Rift is off. App shortcuts use
+plain `open` (`open-here.sh` needs Rift).
+
+Back to Rift: `launchctl enable gui/$(id -u)/git.acsandmann.rift && rift service start`, restore
+`skhdrc` from git history (commit before this section), and
+`launchctl bootout gui/$(id -u)/local.autoraise`.
+
+## Window manager: Rift (disabled)
 
 BSP (dwindle-like) tiling, 10 px gaps, animations, focus follows mouse and the mouse follows
 keyboard focus (centred on the window, then hidden until it moves), 4 workspaces **per
@@ -152,6 +174,8 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch btop unar
 brew install --cask font-jetbrains-mono-nerd-font nordpass the-unarchiver
 brew install acsandmann/tap/rift asmvik/formulae/skhd FelixKratz/formulae/borders
+git clone --depth 1 --branch v5.7 https://github.com/sbmpost/AutoRaise ~/.local/src/AutoRaise
+(cd ~/.local/src/AutoRaise && make && mkdir -p ~/Applications && cp -R AutoRaise.app ~/Applications/)
 
 d=~/dotfiles/macos   # this folder
 mkdir -p ~/.config/rift ~/.config/skhd ~/.config/kitty ~/.config/fastfetch ~/.config/borders
@@ -161,10 +185,12 @@ cp $d/kitty/*.conf ~/.config/kitty/
 cp $d/starship.toml ~/.config/ && cp $d/zshrc ~/.zshrc && touch ~/.hushlogin
 cp $d/fastfetch/* ~/.config/fastfetch/   # plus your own logo.png
 
-rift service install && rift service start   # then allow rift in Accessibility, `rift service restart`
+# rift service install && rift service start   # only if going back to Rift
 skhd --start-service                         # allow skhd in Accessibility and Screen Recording
 cp $d/borders/bordersrc ~/.config/borders/ && chmod +x ~/.config/borders/bordersrc
 brew services start felixkratz/formulae/borders
+cp $d/autoraise/AutoRaise.conf ~/.AutoRaise && cp $d/autoraise/local.autoraise.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.autoraise.plist   # allow AutoRaise in Accessibility
 ```
 
 After editing a live file, copy it back here so this folder stays current.
