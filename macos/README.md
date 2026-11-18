@@ -47,8 +47,9 @@ Rift is **disabled, not removed** (since 2026-11-18): too many bugs from a young
 `fit-min-size.sh` patching. Windows are arranged by hand with macOS tiling and AutoRaise gives
 focus-follows-mouse (hold Ctrl to pause it). **EdgeSync** (`edgesync/`) makes neighbours follow
 a dragged edge: while the left button is down, the first window that changes *size* is the one being
-resized, and every window on the same display touching that edge (≤ 40 px apart) moves its own edge
-along, keeping the gap. Moving a window does nothing. It only polls the mouse button when idle.
+resized, and its edge is treated as a divider: windows on the same display aligned with it in the same
+column/row (e.g. the one stacked above) move that edge too, and the ones touching it from the other
+side (≤ 40 px apart) follow, keeping the gap. Screen-edge borders drag nothing. Moving a window does nothing. It only polls the mouse button when idle.
 Rebuilding it (`edgesync/build.sh`) changes its ad-hoc signature, so macOS drops the Accessibility
 grant: remove it with − and add it again.
 
