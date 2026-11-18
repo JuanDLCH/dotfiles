@@ -62,15 +62,19 @@ EdgeSync also does, only in reaction to the user:
 - **Focus**: while a floating window or a dialog has focus, AutoRaise is paused (SIGSTOP), so hovering
   other windows doesn't cover it; new dialogs and system prompts get focus and the mouse.
 - Moves (⌥-drag, or both edges of an axis changing) never drag neighbours. Moving a window does nothing. It only polls the mouse button when idle.
-Rebuilding it (`edgesync/build.sh`) changes its ad-hoc signature, so macOS drops the Accessibility
-grant: remove it with − and add it again.
+`edgesync/build.sh` signs it with a local self-signed certificate "EdgeSync Local" (login keychain,
+code signing only) when present, so the Accessibility grant survives rebuilds; with an ad-hoc signature
+macOS drops the grant on every rebuild. Native tiling is **off** (Desktop & Dock → Windows: the three
+tiling toggles): macOS kept snapped windows in their half/quarter and undid EdgeSync's changes, so
+EdgeSync snaps on drop itself (mouse at a side → half, corner → quarter, top → full).
+Debug: `touch /tmp/edgesync.debug` logs to `/tmp/edgesync.log` and enables `/tmp/edgesync.cmd`
+(`set <id> x y w h`, `drag x1 y1 x2 y2`) to reproduce issues without the user.
 
 | Keys | Action |
 |---|---|
 | drag a shared edge | both windows resize (EdgeSync) |
 | Opt+G | re-lay out the display under the mouse (1–4 tiled windows, `win-grid`) |
-| Fn+Ctrl+F / arrows | fill / halves (Window → Move & Resize); Opt while dragging snaps without delay |
-| Fn+Ctrl+Shift + arrows | arrange two windows side by side, etc. |
+| drop a window with the mouse at a side / corner / top | half / quarter / full (EdgeSync) |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
 | Razer F13/F14, F15, F16 | Ctrl+←/→, Window → Fill, Cmd+W (via `osascript`/System Events) |
 

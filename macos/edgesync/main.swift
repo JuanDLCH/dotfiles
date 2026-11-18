@@ -134,7 +134,8 @@ func divider(of t: W, _ e: Edge, in all: [W]) -> Divider {
     d.same = group.filter { $0.id != t.id }
     for o in all where !group.contains(where: { $0.id == o.id }) {
         let gap = (val(o.r, oe) - line) * sign
-        guard gap >= -tol, gap <= maxGap else { continue }
+        // hasta 300 px de solape: así se recupera un par que quedó montado (una no se dejó achicar)
+        guard gap >= -300, gap <= maxGap else { continue }
         if group.contains(where: { along($0.r, o.r, e) > 40 }) { d.opp.append(o) }
     }
     // Sin nadie al otro lado es el borde de la pantalla, no un divisor: no arrastrar a las alineadas
@@ -152,7 +153,11 @@ var lastApplied: CGRect? = nil
 func findDividers(_ t: W) {
     let scr = screenRect(at: CGPoint(x: t.r.midX, y: t.r.midY))
     // solo ventanas del mismo monitor (la del monitor de al lado también queda "pegada")
-    let all = baseline.values.filter { o in scr.map { $0.contains(CGPoint(x: o.r.midX, y: o.r.midY)) } ?? true }
+    // (las flotantes, de app o del usuario, no forman parte de ningún divisor)
+    let all = baseline.values.filter { o in
+        (scr.map { $0.contains(CGPoint(x: o.r.midX, y: o.r.midY)) } ?? true) &&
+        (o.id == t.id || (!isFloating(o) && !userFloating.contains(o.id)))
+    }
     dividers = [:]
     for e in Edge.allCases { dividers[e] = divider(of: t, e, in: all) }
 }
@@ -187,6 +192,31 @@ func axFrame(_ a: AXUIElement) -> CGRect? {
     AXValueGetValue(pv as! AXValue, .cgPoint, &p); AXValueGetValue(sv as! AXValue, .cgSize, &s)
     return CGRect(origin: p, size: s)
 }
+func cgFrame(_ id: CGWindowID) -> CGRect? {
+    guard let w = (CGWindowListCopyWindowInfo([.optionIncludingWindow], id) as? [[String: Any]])?.first,
+          let b = w[kCGWindowBounds as String] as? [String: CGFloat],
+          let x = b["X"], let y = b["Y"], let wd = b["Width"], let ht = b["Height"] else { return nil }
+    return CGRect(x: x, y: y, width: wd, height: ht)
+}
+// Justo después de que el usuario arrastra, algunas apps (Claude/Electron) siguen aplicando su
+// propio tamaño un rato y pisan el cambio. Insistir cada 250 ms durante ~2 s hasta que se quede.
+var enforcing: [CGWindowID: CGRect] = [:]
+func enforce(_ w: W, _ r: CGRect, _ tries: Int = 8) {
+    enforcing[w.id] = r
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+        guard enforcing[w.id] == r else { return }          // otra orden más nueva la reemplazó
+        guard let c = cgFrame(w.id) else { enforcing[w.id] = nil; return }
+        let ok = abs(c.minX - r.minX) <= 4 && abs(c.minY - r.minY) <= 4 && abs(c.width - r.width) <= 4 && abs(c.height - r.height) <= 4
+        if ok || tries <= 0 || CGEventSource.buttonState(.combinedSessionState, button: .left) {
+            enforcing[w.id] = nil
+            log("  insistir \(w.id): \(ok ? "quedó" : "no se dejó") \(c)")
+            return
+        }
+        if let a = axWindow(w) { ours[w.id] = Date(); setFrame(a, r, thorough: true) }
+        enforce(w, r, tries - 1)
+    }
+}
+
 // Pone la ventana en `r` y devuelve dónde quedó de verdad (la app puede imponer mínimos/máximos)
 @discardableResult
 func place(_ w: W, _ r: CGRect) -> CGRect {
@@ -198,12 +228,16 @@ func place(_ w: W, _ r: CGRect) -> CGRect {
     }
     // Algunas apps (Claude, Electron) tardan en aplicar el cambio: esperar y reintentar antes de
     // concluir que es su tamaño mínimo
-    var got = axFrame(a) ?? r
+    // Lo que se ve en pantalla (el servidor de ventanas): algunas apps reportan por AX un tamaño
+    // viejo mientras terminan de redimensionarse
+    func real() -> CGRect { usleep(60_000); return cgFrame(w.id) ?? axFrame(a) ?? r }
+    var got = real()
     for _ in 0..<3 where off(got) {
-        usleep(120_000)
+        usleep(100_000)
         setFrame(a, r, thorough: true)
-        got = axFrame(a) ?? r
+        got = real()
     }
+    if off(got) { enforce(w, r) }
     return got
 }
 func isFloating(_ w: W) -> Bool {
@@ -520,7 +554,65 @@ func checkDialogs(_ snap: [CGWindowID: W]) {
     seenPopups = current; popupsPrimed = true
 }
 
+// Arrastre simulado (botón izquierdo) en ~0.6 s, para reproducir lo que hace el usuario
+func simulateDrag(_ from: CGPoint, _ to: CGPoint) {
+    log("cmd drag \(from) -> \(to)")
+    let src = CGEventSource(stateID: .hidSystemState)
+    func post(_ t: CGEventType, _ p: CGPoint) { CGEvent(mouseEventSource: src, mouseType: t, mouseCursorPosition: p, mouseButton: .left)?.post(tap: .cghidEventTap) }
+    post(.mouseMoved, from); usleep(50_000)
+    post(.leftMouseDown, from); usleep(80_000)
+    let steps = 20
+    var i = 1
+    func step() {
+        let t = CGFloat(i) / CGFloat(steps)
+        post(.leftMouseDragged, CGPoint(x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t))
+        i += 1
+        if i <= steps { DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { step() } }
+        else { DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { post(.leftMouseUp, to); log("cmd drag: soltado") } }
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { step() }
+}
+
+// Canal de pruebas (solo con /tmp/edgesync.debug): /tmp/edgesync.cmd con líneas
+// "set <id> <x> <y> <w> <h> <pos|size|both|thorough>" → aplica por AX y registra cómo queda.
+func debugCommands() {
+    guard FileManager.default.fileExists(atPath: "/tmp/edgesync.debug"),
+          let txt = try? String(contentsOfFile: "/tmp/edgesync.cmd", encoding: .utf8) else { return }
+    try? FileManager.default.removeItem(atPath: "/tmp/edgesync.cmd")
+    for line in txt.split(separator: "\n") {
+        let f = line.split(separator: " ").map(String.init)
+        if f.count == 5, f[0] == "drag", let x1 = Double(f[1]), let y1 = Double(f[2]), let x2 = Double(f[3]), let y2 = Double(f[4]) {
+            simulateDrag(CGPoint(x: x1, y: y1), CGPoint(x: x2, y: y2)); continue
+        }
+        guard f.count >= 6, f[0] == "set", let id = CGWindowID(f[1]),
+              let x = Double(f[2]), let y = Double(f[3]), let w = Double(f[4]), let h = Double(f[5]),
+              let win = snapshot()[id], let a = axWindow(win) else { log("cmd: no entiendo \(line)"); continue }
+        let mode = f.count > 6 ? f[6] : "thorough"
+        var p = CGPoint(x: x, y: y), sz = CGSize(width: w, height: h)
+        var errs: [String] = []
+        func setP() { if let v = AXValueCreate(.cgPoint, &p) { errs.append("pos=\(AXUIElementSetAttributeValue(a, kAXPositionAttribute as CFString, v).rawValue)") } }
+        func setS() { if let v = AXValueCreate(.cgSize, &sz) { errs.append("size=\(AXUIElementSetAttributeValue(a, kAXSizeAttribute as CFString, v).rawValue)") } }
+        ours[id] = Date()
+        switch mode {
+        case "pos": setP()
+        case "size": setS()
+        case "both": setP(); setS()
+        default: setS(); setP(); setS()
+        }
+        var settable = DarwinBoolean(false)
+        AXUIElementIsAttributeSettable(a, kAXSizeAttribute as CFString, &settable)
+        log("cmd \(line) -> \(errs) sizeSettable=\(settable.boolValue)")
+        for t in [0.0, 0.1, 0.5, 1.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + t) {
+                ours[id] = Date()
+                log("  t=\(t) ax=\(axFrame(a).map { "\($0)" } ?? "?") cg=\(cgFrame(id).map { "\($0)" } ?? "?")")
+            }
+        }
+    }
+}
+
 func watch() {
+    debugCommands()
     syncAutoRaise()
     let now = Date()
     var snap = snapshot()
@@ -569,6 +661,76 @@ func restoreFollowers() {
     for d in dividers.values { for w in d.same + d.opp { place(w, w.r) } }
 }
 
+// Tras soltar un divisor: si una vecina no pudo achicarse (tamaño mínimo), la arrastrada no puede
+// quedar encima ni la vecina fuera de la pantalla. La vecina vuelve adentro y el borde de la
+// arrastrada se detiene en el de la vecina (como en un tiling WM).
+func resolveAfterResize(_ t: W) {
+    guard let vis = visibleRect(at: CGPoint(x: t.r.midX, y: t.r.midY)) else { return }
+    axCache = [:]
+    let snap = snapshot()
+    guard var T = snap[t.id]?.r else { return }
+    let orig = T
+    for (e, d) in dividers {
+        for w in d.opp {
+            guard var o = snap[w.id]?.r else { continue }
+            // fuera de la pantalla → adentro, con su mismo tamaño
+            var inside = o
+            if inside.maxX > vis.maxX - margin { inside.origin.x = vis.maxX - margin - inside.width }
+            if inside.minX < vis.minX + margin { inside.origin.x = vis.minX + margin }
+            if inside.maxY > vis.maxY - margin { inside.origin.y = vis.maxY - margin - inside.height }
+            if inside.minY < vis.minY + margin { inside.origin.y = vis.minY + margin }
+            if inside != o { o = place(w, inside); log("  \(w.id) vuelve a la pantalla -> \(o)") }
+            // la arrastrada no puede pisar a la vecina
+            guard intersects(T, o) else { continue }
+            switch e {
+            case .right:  T = with(T, .right, o.minX - gap)
+            case .left:   T = with(T, .left, o.maxX + gap)
+            case .bottom: T = with(T, .bottom, o.minY - gap)
+            case .top:    T = with(T, .top, o.maxY + gap)
+            }
+        }
+    }
+    if T != orig { let got = place(t, T); log("  tope por tamaño mínimo: \(t.id) -> \(got)") }
+}
+
+// Encaje al soltar: la ventana que el usuario movió (la de la app activa cuya posición cambió) y
+// la celda según dónde está el mouse: borde izq/der → mitad, esquina → cuarto, arriba → completa.
+let edgeZone: CGFloat = 12       // px desde el borde de la pantalla
+let cornerZone: CGFloat = 160    // px desde la esquina para contar como esquina
+func snapTarget() -> (W, CGRect)? {
+    let front = NSWorkspace.shared.frontmostApplication?.processIdentifier
+    let cur = snapshot()
+    guard let moved = baseline.values.compactMap({ b -> W? in
+        guard let c = cur[b.id], b.pid == front,
+              abs(c.r.minX - b.r.minX) > 20 || abs(c.r.minY - b.r.minY) > 20 else { return nil }
+        return W(id: b.id, pid: b.pid, r: b.r)
+    }).first, !isFloating(moved) else { return nil }
+    let mainH = NSScreen.screens[0].frame.height
+    let m = NSEvent.mouseLocation
+    let p = CGPoint(x: m.x, y: mainH - m.y)
+    guard let scr = NSScreen.screens.first(where: { NSMouseInRect(m, $0.frame, false) }) else { return nil }
+    let full = CGRect(x: scr.frame.minX, y: mainH - scr.frame.maxY, width: scr.frame.width, height: scr.frame.height)
+    let vis = CGRect(x: scr.visibleFrame.minX, y: mainH - scr.visibleFrame.maxY,
+                     width: scr.visibleFrame.width, height: scr.visibleFrame.height)
+    let nearL = p.x - full.minX <= edgeZone, nearR = full.maxX - p.x <= edgeZone
+    let nearT = p.y - vis.minY <= edgeZone, nearB = full.maxY - p.y <= edgeZone
+    let inTopCorner = p.y - vis.minY <= cornerZone, inBottomCorner = full.maxY - p.y <= cornerZone
+    let inLeftCorner = p.x - full.minX <= cornerZone, inRightCorner = full.maxX - p.x <= cornerZone
+    let v = vis.insetBy(dx: margin, dy: margin)
+    let hw = (v.width - gap) / 2, hh = (v.height - gap) / 2
+    let L = CGRect(x: v.minX, y: v.minY, width: hw, height: v.height)
+    let R = CGRect(x: v.minX + hw + gap, y: v.minY, width: hw, height: v.height)
+    let TL = CGRect(x: v.minX, y: v.minY, width: hw, height: hh), TR = CGRect(x: v.minX + hw + gap, y: v.minY, width: hw, height: hh)
+    let BL = CGRect(x: v.minX, y: v.minY + hh + gap, width: hw, height: hh), BR = CGRect(x: v.minX + hw + gap, y: v.minY + hh + gap, width: hw, height: hh)
+    var cell: CGRect? = nil
+    if nearL { cell = inTopCorner ? TL : inBottomCorner ? BL : L }
+    else if nearR { cell = inTopCorner ? TR : inBottomCorner ? BR : R }
+    else if nearT { cell = inLeftCorner ? TL : inRightCorner ? TR : v }
+    else if nearB { cell = inLeftCorner ? BL : inRightCorner ? BR : nil }
+    guard let c = cell else { return nil }
+    return (moved, c)
+}
+
 func tick() {
     let down = CGEventSource.buttonState(.combinedSessionState, button: .left)
     if down && !dragging {
@@ -580,7 +742,23 @@ func tick() {
     }
     if !down && dragging {
         // fin del arrastre: un último ajuste con el tamaño final
-        if let t = target, !moving, let now = snapshot()[t.id]?.r, isEdgeResize(t.r, now) { apply(now); log("fin \(t.id) \(now)") }
+        if let t = target, !moving, let now = snapshot()[t.id]?.r, isEdgeResize(t.r, now) {
+            apply(now); log("fin \(t.id) \(now)")
+            let ds = dividers
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { dividers = ds; resolveAfterResize(t) }
+        }
+        // ¿Se movió una ventana y se soltó con el mouse en un borde? → encajarla (reemplaza al
+        // mosaico nativo, que está apagado: macOS deshacía lo que EdgeSync acomodaba)
+        if target == nil, let (w, cell) = snapTarget() {
+            log("encajar \(w.id) -> \(cell)")
+            let got = place(w, cell)
+            log("  encajada -> \(got)")
+            let old = w.r, id = w.id
+            dragging = false; target = nil; moving = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { settle(id, old: old); prev = snapshot() }
+            prev = baseline
+            return
+        }
         dragging = false; target = nil; moving = false
         prev = baseline   // para que watch() vea lo que cambió durante el arrastre
         return
