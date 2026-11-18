@@ -29,7 +29,7 @@ alt - l         : /usr/bin/pmset sleepnow                    # dormir el Mac
 
 # ===== Captura =====
 alt - s    : ~/.config/skhd/screenshot.sh                   # monitor bajo el mouse → portapapeles
-alt + shift - s : ~/.config/skhd/screenshot-area.sh         # captura de área con Shottr (pantalla congelada)
+alt + shift - s : ~/.config/skhd/screenshot-area.sh         # captura congelada: clic = ventana, arrastrar = área, Esc = cancelar
 
 # ===== Mouse Razer Basilisk V3 Pro (F13–F18 en la memoria del mouse) =====
 # Mismo mapeo que en Hyprland (repo dotfiles, README → "Mouse").

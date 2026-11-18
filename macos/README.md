@@ -35,7 +35,6 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | The Unarchiver, unar | cask `the-unarchiver`, Homebrew core | none | RAR and other archives (GUI and `unar` / `lsar` CLI) |
 | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
-| [Shottr](https://shottr.cc/) | cask `shottr` (notarized) | Screen Recording | area screenshots on a frozen screen (Opt+Shift+S, `shottr://grab/area`) |
 | [AutoRaise](https://github.com/sbmpost/AutoRaise) v5.7 | built from source (not in Homebrew), `~/Applications` | Accessibility | focus follows mouse |
 | [EdgeSync](https://github.com/JuanDLCH/edgesync) (+ `win-grid`, `send-key`) | separate project, see below | Accessibility | shared edges, snapping, layouts, keyboard focus |
 
@@ -117,7 +116,7 @@ App shortcuts go through `open-here.sh`: if the app's **new** window lands on an
 display under the mouse. Activating an app that is already open moves nothing.
 | Opt+L | sleep (`pmset sleepnow`; Ctrl+Cmd+Q only locks) |
 | Opt+S | screenshot of the display under the mouse → clipboard |
-| Opt+Shift+S | area screenshot with Shottr on a frozen screen (`screenshot-area.sh` → `shottr://grab/area`) |
+| Opt+Shift+S | frozen-screen screenshot (EdgeSync's `freeze-shot`): click = window, menu bar = display, drag = area, Esc |
 
 ## Mouse (Razer Basilisk V3 Pro)
 
@@ -188,7 +187,7 @@ System Settings → Keyboard → Keyboard Shortcuts → Display. Free F-keys on 
 
 ```bash
 brew install kitty starship zsh-autosuggestions zsh-syntax-highlighting fzf zoxide eza bat gh fastfetch btop unar
-brew install --cask font-jetbrains-mono-nerd-font nordpass the-unarchiver shottr
+brew install --cask font-jetbrains-mono-nerd-font nordpass the-unarchiver
 brew install acsandmann/tap/rift asmvik/formulae/skhd FelixKratz/formulae/borders
 git clone --depth 1 --branch v5.7 https://github.com/sbmpost/AutoRaise ~/.local/src/AutoRaise
 (cd ~/.local/src/AutoRaise && make && mkdir -p ~/Applications && cp -R AutoRaise.app ~/Applications/)
