@@ -57,6 +57,7 @@ EdgeSync also does, only in reaction to the user:
   Electron; if one has a minimum size, the placed one adapts, never below 200 px), then small gaps
   (≤ 250 px) are filled. Dropped anywhere else = **floating**: remembered per window
   (`/tmp/edgesync-floating`), and the remaining tiled windows are re-laid out.
+- **Margins**: windows sit flush under the menu bar, 8 px from the sides and bottom, 10 px apart (the menu bar height is taken from the screen that reports it: macOS says the secondary display has none).
 - **Layout** (re-layout, close, ⌥G): 1 → full, 2 → halves, 3 → master left + 2 rows right, 4 → dwindle (left column, top-right, bottom-right split in two),
   each window to the nearest cell. Closing a tiled window re-lays out its display.
 - **Focus**: while a floating window or a dialog has focus, AutoRaise is paused (SIGSTOP), so hovering

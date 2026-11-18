@@ -243,11 +243,24 @@ func place(_ w: W, _ r: CGRect) -> CGRect {
 func isFloating(_ w: W) -> Bool {
     floating.contains(bundle(w.pid))
 }
+// Área útil de un monitor (arriba-izquierda). macOS a veces dice que un monitor secundario no
+// tiene barra de menú aunque se ve: se usa la altura de barra mayor entre todos los monitores.
+func usable(_ s: NSScreen) -> CGRect {
+    let mainH = NSScreen.screens[0].frame.height
+    let bar = NSScreen.screens.map { $0.frame.maxY - $0.visibleFrame.maxY }.max() ?? 0
+    let top = mainH - s.frame.maxY + max(bar, s.frame.maxY - s.visibleFrame.maxY)
+    let bottom = mainH - s.visibleFrame.minY
+    return CGRect(x: s.visibleFrame.minX, y: top, width: s.visibleFrame.width, height: bottom - top)
+}
 func visibleRect(at p: CGPoint) -> CGRect? {
     let mainH = NSScreen.screens[0].frame.height
-    return NSScreen.screens.map { CGRect(x: $0.visibleFrame.minX, y: mainH - $0.visibleFrame.maxY,
-                                         width: $0.visibleFrame.width, height: $0.visibleFrame.height) }
-        .first { $0.contains(p) }
+    return NSScreen.screens.first { s in
+        CGRect(x: s.frame.minX, y: mainH - s.frame.maxY, width: s.frame.width, height: s.frame.height).contains(p)
+    }.map(usable)
+}
+// Donde van las ventanas: pegadas a la barra de menú arriba, `margin` a los lados y abajo
+func work(_ vis: CGRect) -> CGRect {
+    CGRect(x: vis.minX + margin, y: vis.minY, width: vis.width - 2 * margin, height: vis.height - margin)
 }
 func intersects(_ a: CGRect, _ b: CGRect) -> Bool {
     overlap(a.minX, a.maxX, b.minX, b.maxX) > 20 && overlap(a.minY, a.maxY, b.minY, b.maxY) > 20
@@ -284,7 +297,7 @@ func regrid(_ vis: CGRect) {
     let ws = cand.filter { w in looksTiled(w.r, vis, cand.filter { $0.id != w.id }.map { $0.r }) }
         .sorted { $0.id < $1.id }
     guard (1...4).contains(ws.count) else { return }
-    let v = vis.insetBy(dx: margin, dy: margin)
+    let v = work(vis)
     let hw = (v.width - gap) / 2, hh = (v.height - gap) / 2
     let L  = CGRect(x: v.minX, y: v.minY, width: hw, height: v.height)
     let R  = CGRect(x: v.minX + hw + gap, y: v.minY, width: hw, height: v.height)
@@ -476,7 +489,7 @@ func settle(_ id: CGWindowID, old: CGRect? = nil) {
                         .map { $0.minX - gap }.min() ?? vis.maxX - margin
         case .top:
             return rects.filter { overlap(T.minX, T.maxX, $0.minX, $0.maxX) > 40 && $0.maxY <= T.minY + tol }
-                        .map { $0.maxY + gap }.max() ?? vis.minY + margin
+                        .map { $0.maxY + gap }.max() ?? vis.minY
         case .bottom:
             return rects.filter { overlap(T.minX, T.maxX, $0.minX, $0.maxX) > 40 && $0.minY >= T.maxY - tol }
                         .map { $0.minY - gap }.min() ?? vis.maxY - margin
@@ -727,7 +740,7 @@ func resolveAfterResize(_ t: W) {
             if inside.maxX > vis.maxX - margin { inside.origin.x = vis.maxX - margin - inside.width }
             if inside.minX < vis.minX + margin { inside.origin.x = vis.minX + margin }
             if inside.maxY > vis.maxY - margin { inside.origin.y = vis.maxY - margin - inside.height }
-            if inside.minY < vis.minY + margin { inside.origin.y = vis.minY + margin }
+            if inside.minY < vis.minY { inside.origin.y = vis.minY }
             if inside != o { o = place(w, inside); log("  \(w.id) vuelve a la pantalla -> \(o)") }
             // la arrastrada no puede pisar a la vecina
             guard intersects(T, o) else { continue }
@@ -758,9 +771,8 @@ func snapTarget() -> (W, CGRect)? {
     let m = NSEvent.mouseLocation
     let p = CGPoint(x: m.x, y: mainH - m.y)
     guard let scr = NSScreen.screens.first(where: { NSMouseInRect(m, $0.frame, false) }) else { return nil }
-    let vis = CGRect(x: scr.visibleFrame.minX, y: mainH - scr.visibleFrame.maxY,
-                     width: scr.visibleFrame.width, height: scr.visibleFrame.height)
-    let v = vis.insetBy(dx: margin, dy: margin)
+    let vis = usable(scr)
+    let v = work(vis)
     let hw = (v.width - gap) / 2, hh = (v.height - gap) / 2
     let L = CGRect(x: v.minX, y: v.minY, width: hw, height: v.height)
     let R = CGRect(x: v.minX + hw + gap, y: v.minY, width: hw, height: v.height)

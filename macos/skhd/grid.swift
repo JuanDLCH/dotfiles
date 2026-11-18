@@ -26,7 +26,13 @@ func tl(_ f: NSRect) -> CGRect { CGRect(x: f.minX, y: mainH - f.maxY, width: f.w
 let m = NSEvent.mouseLocation
 guard let screen = NSScreen.screens.first(where: { NSMouseInRect(m, $0.frame, false) }) else { exit(1) }
 let full = tl(screen.frame)
-let vis = tl(screen.visibleFrame).insetBy(dx: margin, dy: margin)
+// Área útil: macOS a veces dice que un monitor secundario no tiene barra de menú aunque se ve,
+// así que se usa la barra más alta. Pegadas a la barra arriba; `margin` a los lados y abajo.
+let bar = NSScreen.screens.map { $0.frame.maxY - $0.visibleFrame.maxY }.max() ?? 0
+let top = mainH - screen.frame.maxY + max(bar, screen.frame.maxY - screen.visibleFrame.maxY)
+let bottom = mainH - screen.visibleFrame.minY
+let vis = CGRect(x: screen.visibleFrame.minX + margin, y: top,
+                 width: screen.visibleFrame.width - 2 * margin, height: bottom - margin - top)
 
 // Ventanas visibles de ese monitor
 let info = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
