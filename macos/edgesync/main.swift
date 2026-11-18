@@ -111,6 +111,7 @@ func tick() {
     let down = CGEventSource.buttonState(.combinedSessionState, button: .left)
     if down && !dragging {
         dragging = true; baseline = snapshot(); target = nil; lastApplied = nil; axCache = [:]
+        log("click, permiso=\(AXIsProcessTrusted())")
         return
     }
     if !down && dragging {
@@ -135,7 +136,10 @@ func tick() {
     if let t = target, let now = cur[t.id]?.r { apply(now) }
 }
 
-if !AXIsProcessTrusted() {
+// Pedir el permiso: macOS agrega EdgeSync a Accesibilidad con su firma actual (tras recompilar,
+// quitar la entrada vieja con − y reiniciar el servicio).
+let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+if !AXIsProcessTrustedWithOptions(opts) {
     FileHandle.standardError.write("EdgeSync necesita permiso de Accesibilidad\n".data(using: .utf8)!)
 }
 Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { _ in tick() }
