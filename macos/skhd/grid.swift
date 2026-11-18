@@ -1,6 +1,6 @@
 // win-grid: reparte en partes iguales las ventanas (no flotantes) del monitor bajo el mouse,
 // según dónde está cada una. 1 → pantalla, 2 → mitades, 3 → izquierda + dos apiladas a la
-// derecha, 4 → cuadrícula 2×2 (cada una al cuarto más cercano). Con más de 4 no hace nada.
+// derecha, 4 → dwindle (izquierda, arriba-derecha, abajo-derecha partido en dos). Con más de 4 no hace nada.
 // Lo ejecuta skhd (Option+G) y usa su permiso de Accesibilidad.
 import AppKit
 import ApplicationServices
@@ -91,7 +91,13 @@ case 2: plan = assign(wins, [L, R])
 case 3:
     let left = wins.min { $0.r.midX < $1.r.midX }!
     plan = [(left, L)] + assign(wins.filter { $0.id != left.id }, [TR, BR])
-default: plan = assign(wins, [TL, TR, BL, BR])
+default:
+    // dwindle: 1 columna izquierda, 2 arriba a la derecha, 3 y 4 se reparten abajo a la derecha
+    let left = wins.min { $0.r.midX < $1.r.midX }!
+    let bw = (BR.width - gap) / 2
+    let BRa = CGRect(x: BR.minX, y: BR.minY, width: bw, height: BR.height)
+    let BRb = CGRect(x: BR.minX + bw + gap, y: BR.minY, width: bw, height: BR.height)
+    plan = [(left, L)] + assign(wins.filter { $0.id != left.id }, [TR, BRa, BRb])
 }
 
 for (w, r) in plan {

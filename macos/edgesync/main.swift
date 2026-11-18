@@ -263,7 +263,7 @@ func saveFloating() {
 }
 
 // Reorganizar el monitor con la prioridad del usuario (igual que ⌥G):
-// 1 → pantalla, 2 → mitades, 3 → master izquierda + 2 filas a la derecha, 4 → 2×2.
+// 1 → pantalla, 2 → mitades, 3 → master izquierda + 2 filas a la derecha, 4 → dwindle (izquierda, arriba-derecha, abajo-derecha partido en dos).
 // ¿Está encajada? Cada lado cuenta si está pegado al borde del monitor o a otra ventana; con ≥ 3
 // lados así es parte del mosaico (una suelta flota en medio y no toca casi nada).
 func looksTiled(_ r: CGRect, _ vis: CGRect, _ others: [CGRect]) -> Bool {
@@ -311,7 +311,13 @@ func regrid(_ vis: CGRect) {
     case 3:
         let left = ws.min { $0.r.midX < $1.r.midX }!
         plan = [(left, L)] + assign(ws.filter { $0.id != left.id }, [TR, BR])
-    default: plan = assign(ws, [TL, TR, BL, BR])
+    default:
+        // dwindle: 1 columna izquierda, 2 arriba a la derecha, 3 y 4 se reparten abajo a la derecha
+        let left = ws.min { $0.r.midX < $1.r.midX }!
+        let bw = (BR.width - gap) / 2
+        let BRa = CGRect(x: BR.minX, y: BR.minY, width: bw, height: BR.height)
+        let BRb = CGRect(x: BR.minX + bw + gap, y: BR.minY, width: bw, height: BR.height)
+        plan = [(left, L)] + assign(ws.filter { $0.id != left.id }, [TR, BRa, BRb])
     }
     for (w, r) in plan { let got = place(w, r); log("  regrid \(w.id) -> \(got)") }
     // Algunas apps vuelven a su tamaño anterior un instante después: revisar y reaplicar
@@ -367,7 +373,12 @@ func fillHole(_ old: CGRect, _ others: [W], _ vis: CGRect) {
     }
 }
 
+var lastDragEnd = Date.distantPast   // cuándo soltó el usuario el botón tras arrastrar
+
 func settle(_ id: CGWindowID, old: CGRect? = nil) {
+    // Solo como reacción a un arrastre del usuario. Si una app cambia de tamaño sola (o abre una
+    // ventana), no se marca nada como flotante ni se reacomoda.
+    guard Date().timeIntervalSince(lastDragEnd) < 2.0 else { log("settle \(id): ignorado (no lo arrastró el usuario)"); return }
     let snap = snapshot()
     guard let t = snap[id], !isFloating(t),
           let vis = visibleRect(at: CGPoint(x: t.r.midX, y: t.r.midY)) else { return }
@@ -785,6 +796,7 @@ func tick() {
         return
     }
     if !down && dragging {
+        lastDragEnd = Date()
         // fin del arrastre: un último ajuste con el tamaño final
         if let t = target, !moving, let now = snapshot()[t.id]?.r, isEdgeResize(t.r, now) {
             apply(now); log("fin \(t.id) \(now)")
