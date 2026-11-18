@@ -36,23 +36,26 @@ copies of the live files, restored by hand (see [Restore](#restore)).
 | [JankyBorders](https://github.com/FelixKratz/JankyBorders) | `FelixKratz/formulae/borders` (built from source) | none | purple border on the focused window |
 | NordPass | cask `nordpass` | none | passwords |
 | [AutoRaise](https://github.com/sbmpost/AutoRaise) v5.7 | built from source (not in Homebrew), `~/Applications` | Accessibility | focus follows mouse |
-| [EdgeSync](https://github.com/JuanDLCH/edgesync) + `win-grid` | own project, built from source | Accessibility | shared edges, snapping, layouts |
+| [EdgeSync](https://github.com/JuanDLCH/edgesync) (+ `win-grid`, `send-key`) | separate project, see below | Accessibility | shared edges, snapping, layouts, keyboard focus |
 
 Music in the menu bar is native: System Settings → Menu Bar → Now Playing → Always Show in Menu Bar.
 
 ## Windows: EdgeSync + AutoRaise (current)
 
-Rift is **disabled, not removed** (since 2026-11-18): too many bugs from a young project plus the
-`fit-min-size.sh` patching. Windows are placed by hand; AutoRaise gives focus-follows-mouse (hold
-Ctrl to pause it) and **[EdgeSync](https://github.com/JuanDLCH/edgesync)** (own project, separate
-repo, includes `win-grid`) adds Hyprland-like behaviour: shared edges that move together, snapping
-by drop zone, making room on drop, floating windows, dwindle re-layout on close and ⌥G, and focus for
-floating windows and dialogs. See its README for details, settings and debugging.
+Rift is **disabled, not removed** (since 2026-11-18). Windows are placed by hand: AutoRaise gives
+focus-follows-mouse (hold Ctrl to pause it) and **[EdgeSync](https://github.com/JuanDLCH/edgesync)**
+does the rest. EdgeSync is a separate project; this repo only installs it and binds its hotkeys in
+`skhdrc`. Its README covers what it does, settings and debugging.
 
-Native tiling is **off** (Desktop & Dock → Windows: the three tiling toggles): macOS kept snapped
-windows in their half/quarter and undid EdgeSync's changes. EdgeSync is signed with a local
-self-signed certificate "EdgeSync Local" (its `make-cert.sh`) so the Accessibility grant survives
-rebuilds.
+Install it on a Mac (projects live in `~/Documents/$USER/projects` on every machine):
+
+```bash
+mkdir -p ~/Documents/$USER/projects && cd ~/Documents/$USER/projects
+git clone https://github.com/JuanDLCH/edgesync && cd edgesync
+./make-cert.sh && ./install.sh   # then allow EdgeSync in Privacy & Security → Accessibility
+```
+
+and turn off native tiling (Desktop & Dock → Windows: the three tiling toggles), which EdgeSync needs.
 
 | Keys | Action |
 |---|---|
@@ -203,7 +206,7 @@ cp $d/borders/bordersrc ~/.config/borders/ && chmod +x ~/.config/borders/borders
 brew services start felixkratz/formulae/borders
 cp $d/autoraise/AutoRaise.conf ~/.AutoRaise && cp $d/autoraise/local.autoraise.plist ~/Library/LaunchAgents/
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.autoraise.plist   # allow AutoRaise in Accessibility
-git clone https://github.com/JuanDLCH/edgesync ~/edgesync && ~/edgesync/make-cert.sh && ~/edgesync/install.sh   # allow EdgeSync in Accessibility
+# EdgeSync: see "Windows" above (cloned into ~/Documents/$USER/projects/edgesync)
 ```
 
 After editing a live file, copy it back here so this folder stays current.
