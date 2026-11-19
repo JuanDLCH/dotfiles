@@ -33,8 +33,8 @@ alt + shift - s : ~/.config/skhd/screenshot-area.sh         # captura congelada:
 
 # ===== Mouse Razer Basilisk V3 Pro (F13–F18 en la memoria del mouse) =====
 # Mismo mapeo que en Hyprland (repo dotfiles, README → "Mouse").
-f13 : ~/.local/bin/send-key ctrl left                      # rueda ←: escritorio anterior (Ctrl+←)
-f14 : ~/.local/bin/send-key ctrl right                     # rueda →: escritorio siguiente (Ctrl+→)
+f13 : ~/.local/bin/send-key swipe left                     # rueda ←: escritorio anterior (gesto rápido de trackpad)
+f14 : ~/.local/bin/send-key swipe right                    # rueda →: escritorio siguiente (gesto rápido de trackpad)
 f15 : ~/.local/bin/win-grid max                            # Hypershift + clic izq: ampliar / devolver (como ⌥F)
 f16 : ~/.local/bin/send-key cmd w                          # Hypershift + clic der: cerrar ventana (Cmd+W)
 f17 : ~/.config/skhd/screenshot-area.sh                                     # lateral adelante: captura de área (como ⌥⇧S)

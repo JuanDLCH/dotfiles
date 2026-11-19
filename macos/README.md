@@ -65,7 +65,7 @@ and turn off native tiling (Desktop & Dock → Windows: the three tiling toggles
 | Ctrl+Opt + arrows | focus the nearest window in that direction, across displays (`win-grid focus`) |
 | ⌥ + drag a window (preview shows the cell), drop with ⌥ | snap: quarter / column / quarter / full (EdgeSync) |
 | Ctrl+1–4, Ctrl+←/→ | native Spaces (create 4 per display in Mission Control) |
-| Razer F13/F14, F15, F16 | Ctrl+←/→, enlarge/back (`win-grid max`), Cmd+W (via `send-key`) |
+| Razer F13/F14, F15, F16 | previous/next Space as a fast trackpad swipe (`send-key swipe`), enlarge/back (`win-grid max`), Cmd+W |
 
 Opt+A, Opt+Shift+0 and the other Rift keys below do nothing while Rift is off. App shortcuts use
 plain `open` (`open-here.sh` needs Rift).
